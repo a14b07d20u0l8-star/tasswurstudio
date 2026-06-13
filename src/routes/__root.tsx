@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Particles } from "../components/Particles";
 import bgCosmic from "../assets/bg-cosmic.jpg";
+import { Toaster } from "sonner";
 
 function NotFoundComponent() {
   return (
@@ -100,6 +101,7 @@ function RootComponent() {
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,oklch(0.2_0.06_280/0.4),transparent_60%),radial-gradient(ellipse_at_bottom,oklch(0.2_0.1_85/0.25),transparent_60%)]" />
       <Particles />
       <Outlet />
+      <Toaster theme="dark" position="top-center" toastOptions={{ style: { background: "oklch(0.12 0.015 270)", color: "oklch(0.96 0.01 90)", border: "1px solid oklch(0.78 0.14 80 / 30%)" } }} />
     </QueryClientProvider>
   );
 }

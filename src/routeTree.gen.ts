@@ -12,8 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedRelaxaRouteImport } from './routes/_authenticated/relaxa'
+import { Route as AuthenticatedAtvesterRouteImport } from './routes/_authenticated/atvester'
+import { Route as AuthenticatedAddFundsRouteImport } from './routes/_authenticated/add-funds'
 import { Route as AuthenticatedMModuleRouteImport } from './routes/_authenticated/m.$module'
+import { Route as AuthenticatedMModuleCategoryRouteImport } from './routes/_authenticated/m.$module.$category'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -29,9 +33,24 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedRelaxaRoute = AuthenticatedRelaxaRouteImport.update({
   id: '/relaxa',
   path: '/relaxa',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAtvesterRoute = AuthenticatedAtvesterRouteImport.update({
+  id: '/atvester',
+  path: '/atvester',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAddFundsRoute = AuthenticatedAddFundsRouteImport.update({
+  id: '/add-funds',
+  path: '/add-funds',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMModuleRoute = AuthenticatedMModuleRouteImport.update({
@@ -39,39 +58,77 @@ const AuthenticatedMModuleRoute = AuthenticatedMModuleRouteImport.update({
   path: '/m/$module',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMModuleCategoryRoute =
+  AuthenticatedMModuleCategoryRouteImport.update({
+    id: '/$category',
+    path: '/$category',
+    getParentRoute: () => AuthenticatedMModuleRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/add-funds': typeof AuthenticatedAddFundsRoute
+  '/atvester': typeof AuthenticatedAtvesterRoute
   '/relaxa': typeof AuthenticatedRelaxaRoute
-  '/m/$module': typeof AuthenticatedMModuleRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/m/$module': typeof AuthenticatedMModuleRouteWithChildren
+  '/m/$module/$category': typeof AuthenticatedMModuleCategoryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/add-funds': typeof AuthenticatedAddFundsRoute
+  '/atvester': typeof AuthenticatedAtvesterRoute
   '/relaxa': typeof AuthenticatedRelaxaRoute
-  '/m/$module': typeof AuthenticatedMModuleRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/m/$module': typeof AuthenticatedMModuleRouteWithChildren
+  '/m/$module/$category': typeof AuthenticatedMModuleCategoryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/add-funds': typeof AuthenticatedAddFundsRoute
+  '/_authenticated/atvester': typeof AuthenticatedAtvesterRoute
   '/_authenticated/relaxa': typeof AuthenticatedRelaxaRoute
-  '/_authenticated/m/$module': typeof AuthenticatedMModuleRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/m/$module': typeof AuthenticatedMModuleRouteWithChildren
+  '/_authenticated/m/$module/$category': typeof AuthenticatedMModuleCategoryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/relaxa' | '/m/$module'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/add-funds'
+    | '/atvester'
+    | '/relaxa'
+    | '/settings'
+    | '/m/$module'
+    | '/m/$module/$category'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/relaxa' | '/m/$module'
+  to:
+    | '/'
+    | '/auth'
+    | '/add-funds'
+    | '/atvester'
+    | '/relaxa'
+    | '/settings'
+    | '/m/$module'
+    | '/m/$module/$category'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/add-funds'
+    | '/_authenticated/atvester'
     | '/_authenticated/relaxa'
+    | '/_authenticated/settings'
     | '/_authenticated/m/$module'
+    | '/_authenticated/m/$module/$category'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -103,11 +160,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/relaxa': {
       id: '/_authenticated/relaxa'
       path: '/relaxa'
       fullPath: '/relaxa'
       preLoaderRoute: typeof AuthenticatedRelaxaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/atvester': {
+      id: '/_authenticated/atvester'
+      path: '/atvester'
+      fullPath: '/atvester'
+      preLoaderRoute: typeof AuthenticatedAtvesterRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/add-funds': {
+      id: '/_authenticated/add-funds'
+      path: '/add-funds'
+      fullPath: '/add-funds'
+      preLoaderRoute: typeof AuthenticatedAddFundsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/m/$module': {
@@ -117,17 +195,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMModuleRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/m/$module/$category': {
+      id: '/_authenticated/m/$module/$category'
+      path: '/$category'
+      fullPath: '/m/$module/$category'
+      preLoaderRoute: typeof AuthenticatedMModuleCategoryRouteImport
+      parentRoute: typeof AuthenticatedMModuleRoute
+    }
   }
 }
 
+interface AuthenticatedMModuleRouteChildren {
+  AuthenticatedMModuleCategoryRoute: typeof AuthenticatedMModuleCategoryRoute
+}
+
+const AuthenticatedMModuleRouteChildren: AuthenticatedMModuleRouteChildren = {
+  AuthenticatedMModuleCategoryRoute: AuthenticatedMModuleCategoryRoute,
+}
+
+const AuthenticatedMModuleRouteWithChildren =
+  AuthenticatedMModuleRoute._addFileChildren(AuthenticatedMModuleRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAddFundsRoute: typeof AuthenticatedAddFundsRoute
+  AuthenticatedAtvesterRoute: typeof AuthenticatedAtvesterRoute
   AuthenticatedRelaxaRoute: typeof AuthenticatedRelaxaRoute
-  AuthenticatedMModuleRoute: typeof AuthenticatedMModuleRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedMModuleRoute: typeof AuthenticatedMModuleRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAddFundsRoute: AuthenticatedAddFundsRoute,
+  AuthenticatedAtvesterRoute: AuthenticatedAtvesterRoute,
   AuthenticatedRelaxaRoute: AuthenticatedRelaxaRoute,
-  AuthenticatedMModuleRoute: AuthenticatedMModuleRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedMModuleRoute: AuthenticatedMModuleRouteWithChildren,
 }
 
 const AuthenticatedRouteRouteWithChildren =
