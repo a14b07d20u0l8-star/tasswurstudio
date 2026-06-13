@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import portrait from "@/assets/abdullah-portrait.jpg";
 import { Youtube } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,9 +27,10 @@ const R = ({ children }: { children: React.ReactNode }) => (
 );
 
 function IntroPage() {
-  const [stage, setStage] = useState(0); // 0 = logo only, 1 = full
+  const [stage, setStage] = useState(0);
   useEffect(() => {
     const t = setTimeout(() => setStage(1), 1800);
+    supabase.rpc("increment_visitor").then(() => {});
     return () => clearTimeout(t);
   }, []);
 
