@@ -11,24 +11,17 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { Particles } from "../components/Particles";
+import bgCosmic from "../assets/bg-cosmic.jpg";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
-        </div>
+    <div className="relative z-10 flex min-h-dvh items-center justify-center px-4">
+      <div className="glass max-w-md rounded-3xl p-8 text-center animate-scale-in">
+        <h1 className="text-7xl font-display text-gradient-gold">404</h1>
+        <h2 className="mt-4 text-xl font-semibold">Lost in the cosmos</h2>
+        <p className="mt-2 text-sm text-muted-foreground">This page does not exist.</p>
+        <Link to="/" className="btn-neon btn-neon-hover mt-6 inline-block">Go Home</Link>
       </div>
     </div>
   );
@@ -42,30 +35,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Try again
-          </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Go home
-          </a>
+    <div className="relative z-10 flex min-h-dvh items-center justify-center px-4">
+      <div className="glass max-w-md rounded-3xl p-8 text-center">
+        <h1 className="text-xl font-display">Something went wrong</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
+        <div className="mt-6 flex justify-center gap-2">
+          <button onClick={() => { router.invalidate(); reset(); }} className="btn-neon btn-neon-hover">Retry</button>
+          <a href="/" className="rounded-full border border-white/10 px-5 py-2 text-sm">Home</a>
         </div>
       </div>
     </div>
@@ -76,21 +52,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { title: "Tasswur Studio — Relaxa Platform" },
+      { name: "description", content: "Tasswur Studio: Pakistan's premium services & talent marketplace. Serving nation-wide since 2024." },
+      { name: "theme-color", content: "#0b0b0f" },
+      { property: "og:title", content: "Tasswur Studio — Relaxa Platform" },
+      { property: "og:description", content: "Premium services & talent marketplace by Abdullah Tasswur." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "stylesheet", href: appCss },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" },
     ],
   }),
   shellComponent: RootShell,
@@ -101,7 +76,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <HeadContent />
       </head>
@@ -115,10 +90,15 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      {/* Cosmic backdrop layers */}
+      <div
+        className="pointer-events-none fixed inset-0 -z-10 bg-cover bg-center opacity-40"
+        style={{ backgroundImage: `url(${bgCosmic})`, filter: "blur(8px)" }}
+      />
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,oklch(0.2_0.06_280/0.4),transparent_60%),radial-gradient(ellipse_at_bottom,oklch(0.2_0.1_85/0.25),transparent_60%)]" />
+      <Particles />
       <Outlet />
     </QueryClientProvider>
   );
