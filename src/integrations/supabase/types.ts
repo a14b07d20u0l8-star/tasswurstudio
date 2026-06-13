@@ -14,13 +14,209 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      fund_requests: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          note: string | null
+          screenshot_url: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          screenshot_url: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          screenshot_url?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      listings: {
+        Row: {
+          active: boolean
+          address: string | null
+          age: number | null
+          business_name: string | null
+          category: string
+          city: string | null
+          created_at: string
+          experience: string | null
+          expires_at: string
+          fee: number | null
+          id: string
+          images: string[] | null
+          module: string
+          owner_name: string
+          plan: string
+          starts_at: string
+          subjects: string[] | null
+          updated_at: string
+          user_id: string
+          whatsapp: string
+        }
+        Insert: {
+          active?: boolean
+          address?: string | null
+          age?: number | null
+          business_name?: string | null
+          category: string
+          city?: string | null
+          created_at?: string
+          experience?: string | null
+          expires_at: string
+          fee?: number | null
+          id?: string
+          images?: string[] | null
+          module: string
+          owner_name: string
+          plan?: string
+          starts_at?: string
+          subjects?: string[] | null
+          updated_at?: string
+          user_id: string
+          whatsapp: string
+        }
+        Update: {
+          active?: boolean
+          address?: string | null
+          age?: number | null
+          business_name?: string | null
+          category?: string
+          city?: string | null
+          created_at?: string
+          experience?: string | null
+          expires_at?: string
+          fee?: number | null
+          id?: string
+          images?: string[] | null
+          module?: string
+          owner_name?: string
+          plan?: string
+          starts_at?: string
+          subjects?: string[] | null
+          updated_at?: string
+          user_id?: string
+          whatsapp?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          facebook_url: string | null
+          full_name: string | null
+          id: string
+          instagram_url: string | null
+          tokens: number
+          updated_at: string
+          username: string
+          vester_password: string | null
+          vester_unlocked: boolean
+          youtube_url: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          facebook_url?: string | null
+          full_name?: string | null
+          id: string
+          instagram_url?: string | null
+          tokens?: number
+          updated_at?: string
+          username: string
+          vester_password?: string | null
+          vester_unlocked?: boolean
+          youtube_url?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          facebook_url?: string | null
+          full_name?: string | null
+          id?: string
+          instagram_url?: string | null
+          tokens?: number
+          updated_at?: string
+          username?: string
+          vester_password?: string | null
+          vester_unlocked?: boolean
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
+      ratings: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          listing_id: string
+          stars: number
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          listing_id: string
+          stars: number
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          listing_id?: string
+          stars?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ratings_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_stats: {
+        Row: {
+          key: string
+          value: number
+        }
+        Insert: {
+          key: string
+          value?: number
+        }
+        Update: {
+          key?: string
+          value?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_visitor: { Args: never; Returns: number }
     }
     Enums: {
       [_ in never]: never
