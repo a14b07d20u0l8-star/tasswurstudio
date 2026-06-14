@@ -17,6 +17,7 @@ import { Route as AuthenticatedRelaxaRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedAtvesterRouteImport } from './routes/_authenticated/atvester'
 import { Route as AuthenticatedAddFundsRouteImport } from './routes/_authenticated/add-funds'
 import { Route as AuthenticatedMModuleRouteImport } from './routes/_authenticated/m.$module'
+import { Route as AuthenticatedMModuleIndexRouteImport } from './routes/_authenticated/m.$module.index'
 import { Route as AuthenticatedMModuleCategoryRouteImport } from './routes/_authenticated/m.$module.$category'
 
 const AuthRoute = AuthRouteImport.update({
@@ -58,6 +59,12 @@ const AuthenticatedMModuleRoute = AuthenticatedMModuleRouteImport.update({
   path: '/m/$module',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMModuleIndexRoute =
+  AuthenticatedMModuleIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedMModuleRoute,
+  } as any)
 const AuthenticatedMModuleCategoryRoute =
   AuthenticatedMModuleCategoryRouteImport.update({
     id: '/$category',
@@ -74,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/m/$module': typeof AuthenticatedMModuleRouteWithChildren
   '/m/$module/$category': typeof AuthenticatedMModuleCategoryRoute
+  '/m/$module/': typeof AuthenticatedMModuleIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -82,8 +90,8 @@ export interface FileRoutesByTo {
   '/atvester': typeof AuthenticatedAtvesterRoute
   '/relaxa': typeof AuthenticatedRelaxaRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  '/m/$module': typeof AuthenticatedMModuleRouteWithChildren
   '/m/$module/$category': typeof AuthenticatedMModuleCategoryRoute
+  '/m/$module': typeof AuthenticatedMModuleIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/m/$module': typeof AuthenticatedMModuleRouteWithChildren
   '/_authenticated/m/$module/$category': typeof AuthenticatedMModuleCategoryRoute
+  '/_authenticated/m/$module/': typeof AuthenticatedMModuleIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/m/$module'
     | '/m/$module/$category'
+    | '/m/$module/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -116,8 +126,8 @@ export interface FileRouteTypes {
     | '/atvester'
     | '/relaxa'
     | '/settings'
-    | '/m/$module'
     | '/m/$module/$category'
+    | '/m/$module'
   id:
     | '__root__'
     | '/'
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/m/$module'
     | '/_authenticated/m/$module/$category'
+    | '/_authenticated/m/$module/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -195,6 +206,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMModuleRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/m/$module/': {
+      id: '/_authenticated/m/$module/'
+      path: '/'
+      fullPath: '/m/$module/'
+      preLoaderRoute: typeof AuthenticatedMModuleIndexRouteImport
+      parentRoute: typeof AuthenticatedMModuleRoute
+    }
     '/_authenticated/m/$module/$category': {
       id: '/_authenticated/m/$module/$category'
       path: '/$category'
@@ -207,10 +225,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedMModuleRouteChildren {
   AuthenticatedMModuleCategoryRoute: typeof AuthenticatedMModuleCategoryRoute
+  AuthenticatedMModuleIndexRoute: typeof AuthenticatedMModuleIndexRoute
 }
 
 const AuthenticatedMModuleRouteChildren: AuthenticatedMModuleRouteChildren = {
   AuthenticatedMModuleCategoryRoute: AuthenticatedMModuleCategoryRoute,
+  AuthenticatedMModuleIndexRoute: AuthenticatedMModuleIndexRoute,
 }
 
 const AuthenticatedMModuleRouteWithChildren =
