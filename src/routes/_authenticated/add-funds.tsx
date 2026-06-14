@@ -67,7 +67,7 @@ function AddFunds() {
       <div className="mx-auto max-w-md space-y-4">
         <div className="glass rounded-3xl p-5 animate-scale-in">
           <h2 className="font-display text-lg text-gradient-gold">Bank Transfer</h2>
-          <p className="text-xs text-foreground/60">1 PKR = 1 Token</p>
+          <p className="text-xs text-foreground/60">1 PKR = 1 AT Token</p>
           <div className="mt-3 space-y-2 text-sm">
             <BankRow label="Bank" value={BANK.bank} onCopy={copy} />
             <BankRow label="Title" value={BANK.title} onCopy={copy} />
