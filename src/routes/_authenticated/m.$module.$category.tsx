@@ -235,7 +235,7 @@ function CreateForm({
         expires_at: expires,
       });
       if (error) throw error;
-      toast.success("Profile created!");
+      toast.success(`Profile created! ${plan.price} AT deducted.`);
       onCreated();
       onClose();
     } catch (err) {
