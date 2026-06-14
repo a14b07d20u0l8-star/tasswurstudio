@@ -29,18 +29,37 @@ const R = ({ children }: { children: React.ReactNode }) => (
 function IntroPage() {
   const [stage, setStage] = useState(0);
   useEffect(() => {
-    const t = setTimeout(() => setStage(1), 1800);
+    const t = setTimeout(() => setStage(1), 1400);
     supabase.rpc("increment_visitor").then(() => {});
     return () => clearTimeout(t);
   }, []);
 
   return (
     <div className="relative z-10 min-h-dvh">
-      {/* Hero intro */}
       <section className="flex min-h-dvh flex-col items-center justify-center px-4 py-16 text-center">
+        {/* Premium logo / brand mark */}
+        <div className="relative mx-auto mb-8 h-40 w-40 sm:h-48 sm:w-48 animate-logo-entrance group">
+          <div
+            aria-hidden
+            className="absolute -inset-4 rounded-full opacity-70"
+            style={{
+              background: "conic-gradient(from 0deg, oklch(0.82 0.16 85/0.6), oklch(0.6 0.25 295/0.6), oklch(0.7 0.2 240/0.6), oklch(0.82 0.16 85/0.6))",
+              filter: "blur(14px)",
+              animation: "ring-spin 12s linear infinite",
+            }}
+          />
+          <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_center,oklch(0.82_0.16_85/0.45),transparent_70%)] blur-2xl" />
+          <img
+            src={portrait}
+            alt="Tasswur Studio"
+            className="relative h-full w-full rounded-full object-cover ring-2 ring-gold/50 glow-gold transition group-hover:scale-105"
+            style={{ animation: "float-y 6s ease-in-out infinite" }}
+          />
+        </div>
+
         <h1
-          className="font-display text-5xl sm:text-7xl md:text-8xl text-gradient-neon animate-float"
-          style={{ animation: "fade-up 1s ease-out both, gradient-pan 6s ease infinite" }}
+          className="font-display text-5xl sm:text-7xl md:text-8xl text-gradient-neon"
+          style={{ animation: "fade-up 1s ease-out 0.3s both, gradient-pan 6s ease infinite" }}
         >
           Tasswur Studio
         </h1>
@@ -52,36 +71,15 @@ function IntroPage() {
         </p>
 
         {stage >= 1 && (
-          <div
-            className="mt-12 w-full max-w-md animate-scale-in"
-            style={{ animation: "scale-in 0.8s ease-out both" }}
-          >
-            <div className="relative mx-auto h-72 w-72 sm:h-80 sm:w-80">
-              <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_center,oklch(0.78_0.14_80/0.35),transparent_70%)] blur-2xl" />
-              <img
-                src={portrait}
-                alt="Abdullah Tasswur"
-                width={896}
-                height={1280}
-                className="relative h-full w-full rounded-full object-cover ring-2 ring-gold/40 glow-gold"
-                style={{ animation: "float-y 6s ease-in-out infinite" }}
-              />
-            </div>
-            <h2
-              className="mt-8 font-display text-3xl sm:text-4xl text-gradient-gold"
-              style={{ animation: "fade-up 0.8s ease-out 0.3s both" }}
-            >
-              Abdullah Tasswur
-            </h2>
-            <p
-              className="mt-2 text-sm uppercase tracking-[0.3em] text-foreground/60"
-              style={{ animation: "fade-up 0.8s ease-out 0.5s both" }}
-            >
+          <div className="mt-10 animate-scale-in" style={{ animation: "fade-up 0.8s ease-out both" }}>
+            <h2 className="font-display text-3xl sm:text-4xl text-gradient-gold">Abdullah Tasswur</h2>
+            <p className="mt-2 text-sm uppercase tracking-[0.3em] text-foreground/60">
               Motivation for students and dreamers
             </p>
           </div>
         )}
       </section>
+
 
       {/* Story */}
       <section className="mx-auto max-w-3xl px-5 pb-24">
