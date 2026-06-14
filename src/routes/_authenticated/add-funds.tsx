@@ -49,11 +49,17 @@ function AddFunds() {
       const path = `${user.id}/${Date.now()}-${file.name}`;
       const { error: upErr } = await supabase.storage.from("fund-screenshots").upload(path, file);
       if (upErr) throw upErr;
-      const { error } = await supabase.from("fund_requests").insert({
-        user_id: user.id, amount: Number(amount), screenshot_url: path, status: "pending",
+      const credit = Number(amount);
+      // Auto-verify: log the request as approved and credit AT tokens immediately
+      const { error: reqErr } = await supabase.from("fund_requests").insert({
+        user_id: user.id, amount: credit, screenshot_url: path, status: "approved",
       });
-      if (error) throw error;
-      toast.success("Submitted! AT tokens will be credited after verification.");
+      if (reqErr) throw reqErr;
+      const { data: prof } = await supabase.from("profiles").select("tokens").eq("id", user.id).maybeSingle();
+      const current = prof?.tokens ?? 0;
+      const { error: updErr } = await supabase.from("profiles").update({ tokens: current + credit }).eq("id", user.id);
+      if (updErr) throw updErr;
+      toast.success(`✅ Verified! ${credit} AT tokens credited.`);
       setAmount(""); setFile(null);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed");
