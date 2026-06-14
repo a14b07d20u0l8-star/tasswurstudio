@@ -44,10 +44,11 @@ function AuthPage() {
         // Login: accept email OR username
         let email = form.email;
         if (!email.includes("@")) {
-          // username lookup
-          const { data } = await supabase.from("profiles").select("email").eq("username", email).maybeSingle();
-          if (!data?.email) throw new Error("Username not found");
-          email = data.email;
+          // username lookup via security-definer RPC (no broad profiles access)
+          const { data, error: rpcErr } = await (supabase as any).rpc("get_email_by_username", { _username: email });
+          if (rpcErr) throw rpcErr;
+          if (!data) throw new Error("Username not found");
+          email = data as string;
         }
         const { error } = await supabase.auth.signInWithPassword({ email, password: form.password });
         if (error) throw error;
