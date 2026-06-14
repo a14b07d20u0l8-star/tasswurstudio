@@ -93,13 +93,15 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Cosmic backdrop layers */}
+      {/* Global cinematic backdrop */}
       <div
-        className="pointer-events-none fixed inset-0 -z-10 bg-cover bg-center opacity-40"
-        style={{ backgroundImage: `url(${bgCosmic})`, filter: "blur(8px)" }}
+        className="pointer-events-none fixed inset-0 -z-20 bg-cover bg-center"
+        style={{ backgroundImage: `url(${bgCosmic})`, animation: "bg-pan 60s ease-in-out infinite alternate" }}
       />
-      <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,oklch(0.2_0.06_280/0.4),transparent_60%),radial-gradient(ellipse_at_bottom,oklch(0.2_0.1_85/0.25),transparent_60%)]" />
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,oklch(0.08_0.02_280/0.55),oklch(0.04_0.01_270/0.85)_70%)]" />
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,oklch(0.2_0.06_280/0.35),transparent_60%),radial-gradient(ellipse_at_bottom,oklch(0.2_0.1_85/0.2),transparent_60%)]" />
       <Particles />
+
       <Outlet />
       <Toaster theme="dark" position="top-center" toastOptions={{ style: { background: "oklch(0.12 0.015 270)", color: "oklch(0.96 0.01 90)", border: "1px solid oklch(0.78 0.14 80 / 30%)" } }} />
     </QueryClientProvider>

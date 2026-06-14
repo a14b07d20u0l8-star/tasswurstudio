@@ -11,8 +11,8 @@ export const Route = createFileRoute("/_authenticated/atvester")({
 });
 
 const VESTER_FEE = 5000;
-const OWNER_WHATSAPP = "+923000000000"; // TODO: replace with Abdullah's actual number
-const OWNER_MSG = "Assalam-u-Alaikum Abdullah Sir! I have an investment proposal...";
+const OWNER_WHATSAPP = "+923184454400";
+const OWNER_MSG = "Assalam-u-Alaikum Abdullah Sir!\n\nI have created a new product you may like and I need investment for launch. Would you like to invest?";
 
 function AtVester() {
   const [unlocked, setUnlocked] = useState(false);
@@ -109,7 +109,7 @@ function AtVester() {
               target="_blank" rel="noreferrer"
               className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-500 px-4 py-3 text-sm font-bold uppercase tracking-widest text-white transition hover:scale-[1.02]"
             >
-              <MessageCircle size={16} /> Message on WhatsApp
+              <MessageCircle size={16} /> Chat on WhatsApp
             </a>
           </div>
         )}

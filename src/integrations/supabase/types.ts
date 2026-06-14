@@ -196,6 +196,89 @@ export type Database = {
           },
         ]
       }
+      relaxa_messages: {
+        Row: {
+          content: string | null
+          created_at: string
+          duration_ms: number | null
+          id: string
+          kind: string
+          media_url: string | null
+          room_id: string
+          sender_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          kind?: string
+          media_url?: string | null
+          room_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          kind?: string
+          media_url?: string | null
+          room_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "relaxa_messages_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "relaxa_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      relaxa_rooms: {
+        Row: {
+          active: boolean
+          created_at: string
+          ended_at: string | null
+          id: string
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: []
+      }
+      relaxa_waiting: {
+        Row: {
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       site_stats: {
         Row: {
           key: string
@@ -217,6 +300,8 @@ export type Database = {
     }
     Functions: {
       increment_visitor: { Args: never; Returns: number }
+      relaxa_join: { Args: never; Returns: string }
+      relaxa_leave: { Args: { _room: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

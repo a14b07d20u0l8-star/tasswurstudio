@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Logo } from "@/components/Logo";
+
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Sign In · Tasswur Studio" }] }),
@@ -63,11 +65,13 @@ function AuthPage() {
     <div className="relative z-10 flex min-h-dvh items-center justify-center px-4 py-10 page-enter">
       <div className="glass w-full max-w-md rounded-3xl p-6 sm:p-8 animate-scale-in">
         <div className="text-center">
+          <div className="mx-auto mb-4 animate-logo-entrance"><Logo size={64} /></div>
           <h1 className="font-display text-3xl text-gradient-gold">Tasswur Studio</h1>
           <p className="mt-1 text-xs uppercase tracking-[0.3em] text-foreground/60">
             {mode === "login" ? "Welcome Back" : "Create Account"}
           </p>
         </div>
+
 
         <div className="mt-6 grid grid-cols-2 rounded-full bg-white/5 p-1">
           {(["login", "signup"] as const).map((m) => (
