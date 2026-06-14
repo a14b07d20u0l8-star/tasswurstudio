@@ -193,6 +193,18 @@ function CreateForm({
         throw new Error(`Please upload at least ${cfg.fields.minImages} images`);
       }
 
+      // Check AT token balance and deduct activation fee
+      const { data: prof, error: pErr } = await supabase
+        .from("profiles").select("tokens").eq("id", user.id).maybeSingle();
+      if (pErr) throw pErr;
+      const balance = prof?.tokens ?? 0;
+      if (balance < plan.price) {
+        throw new Error(`Need ${plan.price} AT tokens. You have ${balance}. Please Add Funds.`);
+      }
+      const { error: dErr } = await supabase
+        .from("profiles").update({ tokens: balance - plan.price }).eq("id", user.id);
+      if (dErr) throw dErr;
+
       const imageUrls: string[] = [];
       for (const f of files) {
         const path = `${user.id}/${crypto.randomUUID()}-${f.name}`;
