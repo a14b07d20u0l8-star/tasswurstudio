@@ -296,9 +296,42 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_public: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          facebook_url: string | null
+          full_name: string | null
+          id: string | null
+          instagram_url: string | null
+          username: string | null
+          youtube_url: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          facebook_url?: string | null
+          full_name?: string | null
+          id?: string | null
+          instagram_url?: string | null
+          username?: string | null
+          youtube_url?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          facebook_url?: string | null
+          full_name?: string | null
+          id?: string | null
+          instagram_url?: string | null
+          username?: string | null
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      get_email_by_username: { Args: { _username: string }; Returns: string }
       increment_visitor: { Args: never; Returns: number }
       relaxa_join: { Args: never; Returns: string }
       relaxa_leave: { Args: { _room: string }; Returns: undefined }
