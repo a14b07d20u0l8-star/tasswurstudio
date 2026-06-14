@@ -78,7 +78,7 @@ function SettingsPage() {
           <p className="text-xs uppercase tracking-widest text-foreground/60">User Profile</p>
           <h2 className="font-display text-xl text-gradient-gold">@{profile.username}</h2>
           <p className="text-xs text-foreground/60">{profile.email}</p>
-          <p className="mt-2 text-sm">Tokens: <span className="text-gold font-bold">{profile.tokens}</span></p>
+          <p className="mt-2 text-sm">Tokens: <span className="text-gold font-bold">{profile.tokens} AT</span></p>
 
           <label className="mt-4 block">
             <span className="mb-1 block text-xs uppercase tracking-widest text-foreground/60">Full Name</span>
