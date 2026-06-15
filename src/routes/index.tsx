@@ -100,7 +100,7 @@ function IntroPage() {
 
           <div className="mt-10 flex justify-center">
             <Link to="/auth" className="btn-neon btn-neon-hover animate-pulse-glow">
-              Enter Relaxa →
+              Enter Dreamy →
             </Link>
           </div>
         </div>
