@@ -46,7 +46,7 @@ function SettingsPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const updates: Record<string, unknown> = { full_name: profile.full_name };
+      const updates: { full_name: string | null; username?: string } = { full_name: profile.full_name };
       if (newUsername && newUsername !== profile.username) {
         if (!/^[a-zA-Z0-9_]{3,24}$/.test(newUsername)) throw new Error("Username must be 3-24 chars (letters, numbers, _)");
         updates.username = newUsername;
