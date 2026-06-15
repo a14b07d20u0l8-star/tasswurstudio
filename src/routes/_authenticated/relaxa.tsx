@@ -229,6 +229,8 @@ function Relaxa() {
   // ---- Image upload ----
   async function pickImage(file: File) {
     if (!roomId || !userId) return;
+    const banned = containsBannedContent(file.name);
+    if (banned) { toast.error(`Image blocked: filename contains restricted word "${banned}".`); return; }
     const path = `${userId}/img-${Date.now()}-${file.name.replace(/\s/g, "_")}`;
     const { error: upErr } = await supabase.storage.from("relaxa-media").upload(path, file, { contentType: file.type });
     if (upErr) return toast.error(upErr.message);
