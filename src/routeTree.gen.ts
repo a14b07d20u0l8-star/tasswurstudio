@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedSupportRouteImport } from './routes/_authenticated/support'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedRelaxaRouteImport } from './routes/_authenticated/relaxa'
+import { Route as AuthenticatedMyProfilesRouteImport } from './routes/_authenticated/my-profiles'
 import { Route as AuthenticatedAtvesterRouteImport } from './routes/_authenticated/atvester'
 import { Route as AuthenticatedAddFundsRouteImport } from './routes/_authenticated/add-funds'
 import { Route as AuthenticatedMModuleRouteImport } from './routes/_authenticated/m.$module'
@@ -50,6 +51,11 @@ const AuthenticatedRelaxaRoute = AuthenticatedRelaxaRouteImport.update({
   path: '/relaxa',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMyProfilesRoute = AuthenticatedMyProfilesRouteImport.update({
+  id: '/my-profiles',
+  path: '/my-profiles',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAtvesterRoute = AuthenticatedAtvesterRouteImport.update({
   id: '/atvester',
   path: '/atvester',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/add-funds': typeof AuthenticatedAddFundsRoute
   '/atvester': typeof AuthenticatedAtvesterRoute
+  '/my-profiles': typeof AuthenticatedMyProfilesRoute
   '/relaxa': typeof AuthenticatedRelaxaRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/support': typeof AuthenticatedSupportRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/add-funds': typeof AuthenticatedAddFundsRoute
   '/atvester': typeof AuthenticatedAtvesterRoute
+  '/my-profiles': typeof AuthenticatedMyProfilesRoute
   '/relaxa': typeof AuthenticatedRelaxaRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/support': typeof AuthenticatedSupportRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/add-funds': typeof AuthenticatedAddFundsRoute
   '/_authenticated/atvester': typeof AuthenticatedAtvesterRoute
+  '/_authenticated/my-profiles': typeof AuthenticatedMyProfilesRoute
   '/_authenticated/relaxa': typeof AuthenticatedRelaxaRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/support': typeof AuthenticatedSupportRoute
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/add-funds'
     | '/atvester'
+    | '/my-profiles'
     | '/relaxa'
     | '/settings'
     | '/support'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/add-funds'
     | '/atvester'
+    | '/my-profiles'
     | '/relaxa'
     | '/settings'
     | '/support'
@@ -146,6 +157,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/add-funds'
     | '/_authenticated/atvester'
+    | '/_authenticated/my-profiles'
     | '/_authenticated/relaxa'
     | '/_authenticated/settings'
     | '/_authenticated/support'
@@ -204,6 +216,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRelaxaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/my-profiles': {
+      id: '/_authenticated/my-profiles'
+      path: '/my-profiles'
+      fullPath: '/my-profiles'
+      preLoaderRoute: typeof AuthenticatedMyProfilesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/atvester': {
       id: '/_authenticated/atvester'
       path: '/atvester'
@@ -258,6 +277,7 @@ const AuthenticatedMModuleRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAddFundsRoute: typeof AuthenticatedAddFundsRoute
   AuthenticatedAtvesterRoute: typeof AuthenticatedAtvesterRoute
+  AuthenticatedMyProfilesRoute: typeof AuthenticatedMyProfilesRoute
   AuthenticatedRelaxaRoute: typeof AuthenticatedRelaxaRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSupportRoute: typeof AuthenticatedSupportRoute
@@ -267,6 +287,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAddFundsRoute: AuthenticatedAddFundsRoute,
   AuthenticatedAtvesterRoute: AuthenticatedAtvesterRoute,
+  AuthenticatedMyProfilesRoute: AuthenticatedMyProfilesRoute,
   AuthenticatedRelaxaRoute: AuthenticatedRelaxaRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSupportRoute: AuthenticatedSupportRoute,
