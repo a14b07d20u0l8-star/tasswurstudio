@@ -10,16 +10,7 @@ export const Route = createFileRoute("/_authenticated/relaxa")({
   component: Relaxa,
 });
 
-const TILES = [
-  { to: "/m/dfunctions", label: "D-Functions", desc: "Services Marketplace" },
-  { to: "/m/model", label: "On-Model", desc: "Talent & Portfolio" },
-  { to: "/m/academy", label: "On-Academy", desc: "Teachers & Tutors" },
-  { to: "/m/worker", label: "On-Worker", desc: "Skilled Professionals" },
-  { to: "/m/hall", label: "On-Hall", desc: "Halls & Venues" },
-  { to: "/m/bpartner", label: "B-Partner", desc: "Business Partners" },
-  { to: "/atvester", label: "At-Vester", desc: "Investor Gateway" },
-  { to: "/add-funds", label: "Add Funds", desc: "Top-up your tokens" },
-] as const;
+// Services tiles removed — services are accessible via the sidebar only.
 
 type Msg = {
   id: string;
