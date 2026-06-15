@@ -8,7 +8,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Tasswur Studio — Serving nation-wide since 2024" },
-      { name: "description", content: "Meet Abdullah Tasswur — motivation for students and dreamers. Enter the Relaxa platform." },
+      { name: "description", content: "Meet Abdullah Tasswur — motivation for students and dreamers. Enter the Dreamy platform." },
       { property: "og:title", content: "Tasswur Studio — Serving nation-wide since 2024" },
       { property: "og:description", content: "Meet Abdullah Tasswur — motivation for students and dreamers." },
     ],
