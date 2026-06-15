@@ -238,22 +238,11 @@ function Relaxa() {
   }
 
   return (
-    <AppShell title="Relaxa">
+    <AppShell title="Dreamy">
       <div className="mx-auto flex max-w-3xl flex-col gap-4">
-        {/* Quick tiles */}
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {TILES.map((t, i) => (
-            <Link
-              key={t.to}
-              to={t.to}
-              className="glass group rounded-2xl p-3 text-center transition hover:-translate-y-1 hover:glow-gold"
-              style={{ animation: `fade-up 0.5s ease ${i * 0.05}s both` }}
-            >
-              <div className="font-display text-xs uppercase tracking-widest text-gradient-gold">{t.label}</div>
-              <div className="mt-1 text-[10px] text-foreground/60">{t.desc}</div>
-            </Link>
-          ))}
-        </div>
+        {/* Services moved to the sidebar — open the menu (top-left) to browse. */}
+
+
 
         {/* Chat */}
         <div className="glass flex h-[68dvh] flex-col rounded-3xl p-3 animate-scale-in">
