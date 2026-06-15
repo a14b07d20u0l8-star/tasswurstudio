@@ -167,6 +167,8 @@ function Relaxa() {
     e?.preventDefault();
     const txt = input.trim();
     if (!txt || !roomId || !userId) return;
+    const banned = containsBannedContent(txt);
+    if (banned) { toast.error(`Message blocked: contains restricted word "${banned}".`); return; }
     setInput("");
     const { error } = await sdb.from("relaxa_messages").insert({
       room_id: roomId, sender_id: userId, kind: "text", content: txt,
