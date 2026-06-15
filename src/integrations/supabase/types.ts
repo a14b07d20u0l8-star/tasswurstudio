@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      banned_users: {
+        Row: {
+          banned_at: string
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          banned_at?: string
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          banned_at?: string
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       fund_requests: {
         Row: {
           amount: number
@@ -58,11 +76,14 @@ export type Database = {
           fee: number | null
           id: string
           images: string[] | null
+          last_paid_at: string | null
           module: string
           owner_name: string
+          pinned: boolean
           plan: string
           starts_at: string
           subjects: string[] | null
+          total_paid: number
           updated_at: string
           user_id: string
           whatsapp: string
@@ -80,11 +101,14 @@ export type Database = {
           fee?: number | null
           id?: string
           images?: string[] | null
+          last_paid_at?: string | null
           module: string
           owner_name: string
+          pinned?: boolean
           plan?: string
           starts_at?: string
           subjects?: string[] | null
+          total_paid?: number
           updated_at?: string
           user_id: string
           whatsapp: string
@@ -102,11 +126,14 @@ export type Database = {
           fee?: number | null
           id?: string
           images?: string[] | null
+          last_paid_at?: string | null
           module?: string
           owner_name?: string
+          pinned?: boolean
           plan?: string
           starts_at?: string
           subjects?: string[] | null
+          total_paid?: number
           updated_at?: string
           user_id?: string
           whatsapp?: string
@@ -423,6 +450,10 @@ export type Database = {
       }
     }
     Functions: {
+      delete_listing_with_refund: {
+        Args: { _listing_id: string }
+        Returns: number
+      }
       get_email_by_username: { Args: { _username: string }; Returns: string }
       has_role: {
         Args: {

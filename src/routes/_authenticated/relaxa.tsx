@@ -1,25 +1,17 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { Send, Mic, Image as ImageIcon, X, Trash2, Play, Pause, Download, ZoomIn, SkipForward, LogOut, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { containsBannedContent } from "@/lib/modules";
 
 export const Route = createFileRoute("/_authenticated/relaxa")({
-  head: () => ({ meta: [{ title: "Relaxa · Tasswur Studio" }] }),
+  head: () => ({ meta: [{ title: "Dreamy · Tasswur Studio" }] }),
   component: Relaxa,
 });
 
-const TILES = [
-  { to: "/m/dfunctions", label: "D-Functions", desc: "Services Marketplace" },
-  { to: "/m/model", label: "On-Model", desc: "Talent & Portfolio" },
-  { to: "/m/academy", label: "On-Academy", desc: "Teachers & Tutors" },
-  { to: "/m/worker", label: "On-Worker", desc: "Skilled Professionals" },
-  { to: "/m/hall", label: "On-Hall", desc: "Halls & Venues" },
-  { to: "/m/bpartner", label: "B-Partner", desc: "Business Partners" },
-  { to: "/atvester", label: "At-Vester", desc: "Investor Gateway" },
-  { to: "/add-funds", label: "Add Funds", desc: "Top-up your tokens" },
-] as const;
+// Services tiles removed — services are accessible via the sidebar only.
 
 type Msg = {
   id: string;
@@ -175,6 +167,8 @@ function Relaxa() {
     e?.preventDefault();
     const txt = input.trim();
     if (!txt || !roomId || !userId) return;
+    const banned = containsBannedContent(txt);
+    if (banned) { toast.error(`Message blocked: contains restricted word "${banned}".`); return; }
     setInput("");
     const { error } = await sdb.from("relaxa_messages").insert({
       room_id: roomId, sender_id: userId, kind: "text", content: txt,
@@ -235,6 +229,8 @@ function Relaxa() {
   // ---- Image upload ----
   async function pickImage(file: File) {
     if (!roomId || !userId) return;
+    const banned = containsBannedContent(file.name);
+    if (banned) { toast.error(`Image blocked: filename contains restricted word "${banned}".`); return; }
     const path = `${userId}/img-${Date.now()}-${file.name.replace(/\s/g, "_")}`;
     const { error: upErr } = await supabase.storage.from("relaxa-media").upload(path, file, { contentType: file.type });
     if (upErr) return toast.error(upErr.message);
@@ -247,22 +243,11 @@ function Relaxa() {
   }
 
   return (
-    <AppShell title="Relaxa">
+    <AppShell title="Dreamy">
       <div className="mx-auto flex max-w-3xl flex-col gap-4">
-        {/* Quick tiles */}
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {TILES.map((t, i) => (
-            <Link
-              key={t.to}
-              to={t.to}
-              className="glass group rounded-2xl p-3 text-center transition hover:-translate-y-1 hover:glow-gold"
-              style={{ animation: `fade-up 0.5s ease ${i * 0.05}s both` }}
-            >
-              <div className="font-display text-xs uppercase tracking-widest text-gradient-gold">{t.label}</div>
-              <div className="mt-1 text-[10px] text-foreground/60">{t.desc}</div>
-            </Link>
-          ))}
-        </div>
+        {/* Services moved to the sidebar — open the menu (top-left) to browse. */}
+
+
 
         {/* Chat */}
         <div className="glass flex h-[68dvh] flex-col rounded-3xl p-3 animate-scale-in">

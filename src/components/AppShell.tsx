@@ -8,14 +8,16 @@ import { Logo } from "@/components/Logo";
 const NAV = [
   { to: "/relaxa", label: "Dreamy" },
   { to: "/m/dfunctions", label: "D-Services" },
+  { to: "/m/onstore", label: "On-Store" },
   { to: "/m/model", label: "On-Model" },
   { to: "/m/academy", label: "On-Academy" },
   { to: "/m/worker", label: "On-Worker" },
   { to: "/m/hall", label: "On-Hall" },
-  { to: "/relaxa#ondrive", label: "On-Rider" },
+  { to: "/m/onrider", label: "On-Rider" },
   { to: "/m/bpartner", label: "B-Partner" },
   { to: "/atvester", label: "At-Vester" },
   { to: "/support", label: "Support" },
+  { to: "/my-profiles", label: "My Profiles" },
   { to: "/add-funds", label: "Add Funds" },
   { to: "/settings", label: "Settings" },
 ] as const;
