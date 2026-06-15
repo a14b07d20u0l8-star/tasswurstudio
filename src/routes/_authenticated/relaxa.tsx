@@ -1,9 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { Send, Mic, Image as ImageIcon, X, Trash2, Play, Pause, Download, ZoomIn, SkipForward, LogOut, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { containsBannedContent } from "@/lib/modules";
 
 export const Route = createFileRoute("/_authenticated/relaxa")({
   head: () => ({ meta: [{ title: "Relaxa · Tasswur Studio" }] }),
