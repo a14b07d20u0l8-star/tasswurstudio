@@ -5,7 +5,7 @@ import { MODULES, type ModuleKey, type ModuleConfig } from "@/lib/modules";
 import { supabase } from "@/integrations/supabase/client";
 import { waLink } from "@/lib/whatsapp";
 import { toast } from "sonner";
-import { Search, Plus, MessageCircle, Star, X, ImagePlus, Trash2 } from "lucide-react";
+import { Search, Plus, MessageCircle, Star, X, ImagePlus, Trash2, Pin } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/m/$module/$category")({
   component: CategoryPage,
@@ -26,6 +26,22 @@ interface Listing {
   images: string[];
   expires_at: string;
   active: boolean;
+  pinned?: boolean;
+  total_paid?: number;
+}
+
+interface Rating {
+  id: string;
+  listing_id: string;
+  user_id: string;
+  stars: number;
+  comment: string | null;
+  created_at: string;
+}
+
+interface ListingWithStats extends Listing {
+  avg: number;
+  count: number;
 }
 
 function CategoryPage() {
@@ -34,24 +50,48 @@ function CategoryPage() {
   const cfg = MODULES[key];
   const cat = decodeURIComponent(category);
 
-  const [items, setItems] = useState<Listing[]>([]);
+  const [items, setItems] = useState<ListingWithStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [gallery, setGallery] = useState<string[] | null>(null);
+  const [reviewsFor, setReviewsFor] = useState<Listing | null>(null);
+  const [me, setMe] = useState<string | null>(null);
+  const [isOwner, setIsOwner] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data }) => {
+      setMe(data.user?.id ?? null);
+      if (data.user) {
+        const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id);
+        setIsOwner(!!roles?.some(r => r.role === "owner"));
+      }
+    });
+  }, []);
 
   async function load() {
     if (!cfg) return;
     setLoading(true);
     const { data, error } = await supabase
       .from("listings")
-      .select("*")
+      .select("*, ratings(stars)")
       .eq("module", key)
       .eq("category", cat)
       .eq("active", true)
-      .gt("expires_at", new Date().toISOString())
-      .order("created_at", { ascending: false });
+      .gt("expires_at", new Date().toISOString());
     if (error) toast.error(error.message);
-    setItems((data as unknown as Listing[]) ?? []);
+    const withStats: ListingWithStats[] = ((data as any[]) ?? []).map((it) => {
+      const stars: number[] = (it.ratings ?? []).map((r: any) => r.stars);
+      const avg = stars.length ? stars.reduce((a, b) => a + b, 0) / stars.length : 0;
+      return { ...(it as Listing), avg, count: stars.length };
+    });
+    // pinned first, then by avg desc, then count desc
+    withStats.sort((a, b) => {
+      if ((b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) !== 0) return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
+      if (b.avg !== a.avg) return b.avg - a.avg;
+      return b.count - a.count;
+    });
+    setItems(withStats);
     setLoading(false);
   }
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [module, category]);
@@ -68,6 +108,16 @@ function CategoryPage() {
   }, [items, q]);
 
   if (!cfg) return <AppShell title="Not found" back="/relaxa">Unknown</AppShell>;
+
+  async function togglePin(it: Listing) {
+    const { error } = await supabase.from("listings").update({ pinned: !it.pinned }).eq("id", it.id);
+    if (error) toast.error(error.message); else { toast.success(it.pinned ? "Unpinned" : "Pinned"); load(); }
+  }
+  async function ownerDelete(it: Listing) {
+    if (!confirm("Delete this profile?")) return;
+    const { error } = await supabase.from("listings").delete().eq("id", it.id);
+    if (error) toast.error(error.message); else { toast.success("Deleted"); load(); }
+  }
 
   return (
     <AppShell title={`${cfg.title} · ${cat}`} back={`/m/${module}`}>
@@ -97,7 +147,18 @@ function CategoryPage() {
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {filtered.map((it, i) => (
-              <ListingCard key={it.id} item={it} cfg={cfg} delay={i * 0.05} />
+              <ListingCard
+                key={it.id}
+                item={it}
+                cfg={cfg}
+                delay={i * 0.05}
+                isOwner={isOwner}
+                isMine={me === it.user_id}
+                onOpenGallery={() => setGallery(it.images)}
+                onOpenReviews={() => setReviewsFor(it)}
+                onPin={() => togglePin(it)}
+                onDelete={() => ownerDelete(it)}
+              />
             ))}
           </div>
         )}
@@ -106,23 +167,37 @@ function CategoryPage() {
       {showForm && (
         <CreateForm module={key} category={cat} onClose={() => setShowForm(false)} onCreated={load} />
       )}
+      {gallery && <GalleryModal images={gallery} onClose={() => setGallery(null)} />}
+      {reviewsFor && <ReviewsModal listing={reviewsFor} me={me} isOwner={isOwner} onClose={() => setReviewsFor(null)} />}
     </AppShell>
   );
 }
 
-function ListingCard({ item, cfg, delay }: { item: Listing; cfg: ModuleConfig; delay: number }) {
+function ListingCard({
+  item, cfg, delay, isOwner, isMine, onOpenGallery, onOpenReviews, onPin, onDelete,
+}: {
+  item: ListingWithStats; cfg: ModuleConfig; delay: number;
+  isOwner: boolean; isMine: boolean;
+  onOpenGallery: () => void; onOpenReviews: () => void;
+  onPin: () => void; onDelete: () => void;
+}) {
   const title = item.business_name || item.owner_name;
+  const firstImg = item.images?.[0];
   return (
     <div
-      className="glass group rounded-2xl p-4 transition hover:-translate-y-1 hover:glow-purple"
+      className={`glass group relative rounded-2xl p-4 transition hover:-translate-y-1 hover:glow-purple ${item.pinned ? "border-2 border-gold/60" : ""}`}
       style={{ animation: `fade-up 0.4s ease ${delay}s both` }}
     >
-      {item.images?.length > 0 && (
-        <div className="mb-3 grid grid-cols-3 gap-1">
-          {item.images.slice(0, 3).map((u, i) => (
-            <img key={i} src={u} alt="" className="aspect-square rounded-lg object-cover" loading="lazy" />
-          ))}
-        </div>
+      {item.pinned && (
+        <div className="absolute -top-2 left-3 rounded-full bg-gold px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-primary-foreground">📌 Pinned</div>
+      )}
+      {firstImg && (
+        <button onClick={onOpenGallery} className="mb-3 block w-full overflow-hidden rounded-xl">
+          <img src={firstImg} alt="" className="aspect-video w-full object-cover transition group-hover:scale-105" loading="lazy" />
+          {item.images.length > 1 && (
+            <span className="mt-1 block text-right text-[10px] text-foreground/50">+{item.images.length - 1} more — tap to view</span>
+          )}
+        </button>
       )}
       <div className="flex items-start justify-between gap-2">
         <div>
@@ -130,7 +205,8 @@ function ListingCard({ item, cfg, delay }: { item: Listing; cfg: ModuleConfig; d
           {item.business_name && <p className="text-xs text-foreground/60">{item.owner_name}</p>}
         </div>
         <div className="flex items-center gap-1 text-xs text-gold">
-          <Star size={12} fill="currentColor" /> New
+          <Star size={12} fill="currentColor" /> {item.count > 0 ? item.avg.toFixed(1) : "New"}
+          {item.count > 0 && <span className="text-foreground/50">({item.count})</span>}
         </div>
       </div>
       <div className="mt-2 space-y-0.5 text-xs text-foreground/70">
@@ -143,13 +219,133 @@ function ListingCard({ item, cfg, delay }: { item: Listing; cfg: ModuleConfig; d
           <p>Subjects: <span className="text-foreground/90">{item.subjects.join(", ")}</span></p>
         )}
       </div>
-      <a
-        href={waLink(item.whatsapp, `Hi! I found your profile on Tasswur Studio under ${cfg.title}.`)}
-        target="_blank" rel="noreferrer"
-        className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-500/90 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:scale-[1.02]"
-      >
-        <MessageCircle size={14} /> WhatsApp
-      </a>
+      <div className="mt-3 flex gap-2">
+        <a
+          href={waLink(item.whatsapp, `Hi! I found your profile on Tasswur Studio under ${cfg.title}.`)}
+          target="_blank" rel="noreferrer"
+          className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500/90 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:scale-[1.02]"
+        >
+          <MessageCircle size={14} /> WhatsApp
+        </a>
+        <button onClick={onOpenReviews} className="rounded-full border border-gold/40 px-3 py-2 text-xs text-gold transition hover:bg-gold/10">
+          <Star size={12} className="inline" /> Reviews
+        </button>
+      </div>
+      {(isOwner || isMine) && (
+        <div className="mt-2 flex gap-2">
+          {isOwner && (
+            <button onClick={onPin} className="flex-1 rounded-full border border-white/10 px-2 py-1 text-[10px] text-foreground/70 hover:border-gold/50 hover:text-gold">
+              <Pin size={10} className="inline" /> {item.pinned ? "Unpin" : "Pin"}
+            </button>
+          )}
+          {(isOwner || isMine) && (
+            <button onClick={onDelete} className="flex-1 rounded-full border border-destructive/40 px-2 py-1 text-[10px] text-destructive hover:bg-destructive/10">
+              <Trash2 size={10} className="inline" /> Delete
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GalleryModal({ images, onClose }: { images: string[]; onClose: () => void }) {
+  return (
+    <div onClick={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur p-3 animate-fade-in">
+      <div onClick={(e) => e.stopPropagation()} className="glass max-h-[90dvh] w-full max-w-2xl overflow-y-auto rounded-3xl p-4 scrollbar-thin">
+        <div className="mb-3 flex items-center justify-between">
+          <p className="font-display text-sm uppercase tracking-widest text-gradient-gold">Gallery ({images.length})</p>
+          <button onClick={onClose} className="rounded-full p-2 hover:bg-white/10"><X size={16} /></button>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {images.map((u, i) => (
+            <a key={i} href={u} target="_blank" rel="noreferrer" className="overflow-hidden rounded-xl">
+              <img src={u} alt="" className="aspect-square w-full object-cover transition hover:scale-105" />
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ReviewsModal({ listing, me, isOwner, onClose }: { listing: Listing; me: string | null; isOwner: boolean; onClose: () => void }) {
+  const [reviews, setReviews] = useState<Rating[]>([]);
+  const [stars, setStars] = useState(5);
+  const [comment, setComment] = useState("");
+  const [busy, setBusy] = useState(false);
+  const max = isOwner ? 7 : 5;
+
+  async function load() {
+    const { data } = await supabase.from("ratings").select("*").eq("listing_id", listing.id).order("created_at", { ascending: false });
+    setReviews((data as Rating[]) ?? []);
+  }
+  useEffect(() => { load(); }, [listing.id]);
+
+  const mine = reviews.find(r => r.user_id === me);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!me) return toast.error("Sign in required");
+    if (me === listing.user_id) return toast.error("You can't review your own profile");
+    setBusy(true);
+    const payload = { listing_id: listing.id, user_id: me, stars, comment: comment || null };
+    const { error } = mine
+      ? await supabase.from("ratings").update({ stars, comment: comment || null }).eq("id", mine.id)
+      : await supabase.from("ratings").insert(payload);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success(mine ? "Review updated" : "Review submitted");
+    setComment(""); load();
+  }
+
+  return (
+    <div onClick={onClose} className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur p-2 sm:items-center animate-fade-in">
+      <div onClick={(e) => e.stopPropagation()} className="glass max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-3xl p-5 scrollbar-thin">
+        <div className="mb-3 flex items-center justify-between">
+          <div>
+            <h3 className="font-display text-lg text-gradient-gold">Reviews</h3>
+            <p className="text-xs text-foreground/60">{listing.business_name || listing.owner_name}</p>
+          </div>
+          <button onClick={onClose} className="rounded-full p-2 hover:bg-white/10"><X size={16} /></button>
+        </div>
+
+        {me && me !== listing.user_id && (
+          <form onSubmit={submit} className="mb-4 rounded-2xl border border-white/10 bg-black/30 p-3">
+            <p className="mb-2 text-xs uppercase tracking-widest text-foreground/60">
+              {mine ? "Update your review" : "Leave a review"} {isOwner && "(owner: up to 7★)"}
+            </p>
+            <div className="mb-2 flex gap-1">
+              {Array.from({ length: max }, (_, i) => i + 1).map(n => (
+                <button type="button" key={n} onClick={() => setStars(n)} className="transition hover:scale-110">
+                  <Star size={20} className={n <= stars ? "fill-gold text-gold" : "text-foreground/30"} />
+                </button>
+              ))}
+            </div>
+            <textarea
+              value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Optional comment…"
+              maxLength={500} rows={2}
+              className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none focus:border-gold/60"
+            />
+            <button disabled={busy} className="btn-neon btn-neon-hover mt-2 w-full !py-2 !text-xs disabled:opacity-50">
+              {busy ? "Saving…" : mine ? "Update Review" : "Submit Review"}
+            </button>
+          </form>
+        )}
+
+        <div className="space-y-2">
+          {reviews.length === 0 && <p className="py-6 text-center text-sm text-foreground/50">No reviews yet</p>}
+          {reviews.map(r => (
+            <div key={r.id} className="rounded-xl border border-white/10 bg-black/30 p-3">
+              <div className="flex items-center gap-1 text-gold">
+                {Array.from({ length: r.stars }, (_, i) => <Star key={i} size={12} fill="currentColor" />)}
+              </div>
+              {r.comment && <p className="mt-1 text-sm text-foreground/80">{r.comment}</p>}
+              <p className="mt-1 text-[10px] text-foreground/40">{new Date(r.created_at).toLocaleDateString()}</p>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -189,11 +385,11 @@ function CreateForm({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Please sign in");
       const plan = cfg.plans.find((p) => p.id === form.plan)!;
-      if (cfg.fields.minImages && files.length < cfg.fields.minImages) {
-        throw new Error(`Please upload at least ${cfg.fields.minImages} images`);
+      const minImgs = cfg.fields.minImages ?? 0;
+      if (minImgs > 0 && files.length < minImgs) {
+        throw new Error(`Please upload at least ${minImgs} image${minImgs > 1 ? "s" : ""}`);
       }
 
-      // Check AT token balance and deduct activation fee
       const { data: prof, error: pErr } = await supabase
         .from("profiles").select("tokens").eq("id", user.id).maybeSingle();
       if (pErr) throw pErr;
@@ -233,6 +429,8 @@ function CreateForm({
         plan: form.plan,
         active: form.active,
         expires_at: expires,
+        total_paid: plan.price,
+        last_paid_at: new Date().toISOString(),
       });
       if (error) throw error;
       toast.success(`Profile created! ${plan.price} AT deducted.`);
@@ -264,16 +462,14 @@ function CreateForm({
           {cfg.fields.business && <Field label="Business Name" value={form.business_name} onChange={(v) => upd("business_name", v)} />}
           <Field label="Name" required value={form.owner_name} onChange={(v) => upd("owner_name", v)} />
           {cfg.fields.age && <Field label="Age" type="number" value={form.age} onChange={(v) => upd("age", v)} />}
-          {cfg.fields.city && <Field label="City" value={form.city} onChange={(v) => upd("city", v)} />}
+          {cfg.fields.city && <Field label="City" required value={form.city} onChange={(v) => upd("city", v)} />}
           {cfg.fields.address && <Field label="Address" value={form.address} onChange={(v) => upd("address", v)} />}
           <Field label="Experience" placeholder="e.g. 3 years" value={form.experience} onChange={(v) => upd("experience", v)} />
           {cfg.fields.fee && <Field label="Fee per subject (min 300)" type="number" value={form.fee} onChange={(v) => upd("fee", v)} />}
           {cfg.fields.subjects && <Field label="Subjects (comma separated)" value={form.subjects} onChange={(v) => upd("subjects", v)} />}
           <Field label="WhatsApp Number" placeholder="+923XXXXXXXXX" required value={form.whatsapp} onChange={(v) => upd("whatsapp", v)} />
 
-          {cfg.fields.minImages && (
-            <ImageInput files={files} setFiles={setFiles} min={cfg.fields.minImages} />
-          )}
+          <ImageInput files={files} setFiles={setFiles} min={cfg.fields.minImages ?? 0} />
 
           <label className="flex items-center justify-between rounded-xl border border-white/10 bg-black/40 px-4 py-3">
             <span className="text-sm">Active Profile</span>
@@ -333,7 +529,7 @@ function ImageInput({ files, setFiles, min }: { files: File[]; setFiles: (f: Fil
   return (
     <div>
       <p className="mb-1 text-xs uppercase tracking-widest text-foreground/60">
-        Images (min {min}) — {files.length} selected
+        Images{min > 0 ? ` (min ${min})` : " (optional)"} — {files.length} selected
       </p>
       <label className="flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-white/20 bg-black/30 p-6 text-center text-sm text-foreground/60 transition hover:border-gold/50 hover:text-gold">
         <ImagePlus size={20} />
