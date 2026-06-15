@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedSupportRouteImport } from './routes/_authenticated/support'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedRelaxaRouteImport } from './routes/_authenticated/relaxa'
 import { Route as AuthenticatedAtvesterRouteImport } from './routes/_authenticated/atvester'
@@ -33,6 +34,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedSupportRoute = AuthenticatedSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/atvester': typeof AuthenticatedAtvesterRoute
   '/relaxa': typeof AuthenticatedRelaxaRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/support': typeof AuthenticatedSupportRoute
   '/m/$module': typeof AuthenticatedMModuleRouteWithChildren
   '/m/$module/$category': typeof AuthenticatedMModuleCategoryRoute
   '/m/$module/': typeof AuthenticatedMModuleIndexRoute
@@ -90,6 +97,7 @@ export interface FileRoutesByTo {
   '/atvester': typeof AuthenticatedAtvesterRoute
   '/relaxa': typeof AuthenticatedRelaxaRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/support': typeof AuthenticatedSupportRoute
   '/m/$module/$category': typeof AuthenticatedMModuleCategoryRoute
   '/m/$module': typeof AuthenticatedMModuleIndexRoute
 }
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/_authenticated/atvester': typeof AuthenticatedAtvesterRoute
   '/_authenticated/relaxa': typeof AuthenticatedRelaxaRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/support': typeof AuthenticatedSupportRoute
   '/_authenticated/m/$module': typeof AuthenticatedMModuleRouteWithChildren
   '/_authenticated/m/$module/$category': typeof AuthenticatedMModuleCategoryRoute
   '/_authenticated/m/$module/': typeof AuthenticatedMModuleIndexRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/atvester'
     | '/relaxa'
     | '/settings'
+    | '/support'
     | '/m/$module'
     | '/m/$module/$category'
     | '/m/$module/'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/atvester'
     | '/relaxa'
     | '/settings'
+    | '/support'
     | '/m/$module/$category'
     | '/m/$module'
   id:
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '/_authenticated/atvester'
     | '/_authenticated/relaxa'
     | '/_authenticated/settings'
+    | '/_authenticated/support'
     | '/_authenticated/m/$module'
     | '/_authenticated/m/$module/$category'
     | '/_authenticated/m/$module/'
@@ -170,6 +182,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/support': {
+      id: '/_authenticated/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof AuthenticatedSupportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
@@ -241,6 +260,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAtvesterRoute: typeof AuthenticatedAtvesterRoute
   AuthenticatedRelaxaRoute: typeof AuthenticatedRelaxaRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedSupportRoute: typeof AuthenticatedSupportRoute
   AuthenticatedMModuleRoute: typeof AuthenticatedMModuleRouteWithChildren
 }
 
@@ -249,6 +269,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAtvesterRoute: AuthenticatedAtvesterRoute,
   AuthenticatedRelaxaRoute: AuthenticatedRelaxaRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedSupportRoute: AuthenticatedSupportRoute,
   AuthenticatedMModuleRoute: AuthenticatedMModuleRouteWithChildren,
 }
 
@@ -263,13 +284,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -71,6 +71,10 @@ function AddFunds() {
   return (
     <AppShell title="Add Funds" back="/relaxa">
       <div className="mx-auto max-w-md space-y-4">
+        <div className="glass rounded-2xl border border-gold/30 bg-gold/5 p-4 text-sm leading-relaxed text-foreground/85 animate-fade-in">
+          <p className="font-display text-xs uppercase tracking-widest text-gradient-gold mb-2">Note</p>
+          <p>Aap kisi bhi mobile banking app (Easypaisa, Jazzcash, Upaisa, Nayapay, HBL etc..) sa diya huay bank account ma payment ker saktay ha. Payment ka baad us ki receipt yaha uplod karay.</p>
+        </div>
         <div className="glass rounded-3xl p-5 animate-scale-in">
           <h2 className="font-display text-lg text-gradient-gold">Bank Transfer</h2>
           <p className="text-xs text-foreground/60">1 PKR = 1 AT Token</p>

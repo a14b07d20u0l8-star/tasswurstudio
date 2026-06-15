@@ -33,7 +33,7 @@ export interface ModuleConfig {
 export const MODULES: Record<ModuleKey, ModuleConfig> = {
   dfunctions: {
     key: "dfunctions",
-    title: "D-Functions",
+    title: "D-Services",
     tagline: "Services Marketplace",
     categories: [
       "Video Editing",
