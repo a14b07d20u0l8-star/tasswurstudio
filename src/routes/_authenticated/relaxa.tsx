@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { containsBannedContent } from "@/lib/modules";
 
 export const Route = createFileRoute("/_authenticated/relaxa")({
-  head: () => ({ meta: [{ title: "Relaxa · Tasswur Studio" }] }),
+  head: () => ({ meta: [{ title: "Dreamy · Tasswur Studio" }] }),
   component: Relaxa,
 });
 
