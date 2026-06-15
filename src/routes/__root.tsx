@@ -63,8 +63,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Tasswur Studio" },
       { name: "twitter:description", content: "Tasswur Studio: Pakistan's premium services & talent marketplace. Serving nation-wide since 2024." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/12ec6d26-15f9-4f61-90a0-aecab9c04435" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/12ec6d26-15f9-4f61-90a0-aecab9c04435" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/62463cad-f632-4d50-a2f1-f87ced61acce" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/62463cad-f632-4d50-a2f1-f87ced61acce" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
