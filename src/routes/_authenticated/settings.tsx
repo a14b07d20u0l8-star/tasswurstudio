@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LogOut, Trash2, Users, AtSign, KeyRound, Save } from "lucide-react";
+import { LogOut, Trash2, Users, AtSign, KeyRound, Save, Search, Send, Crown } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -24,6 +24,12 @@ function SettingsPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPwd, setConfirmPwd] = useState("");
   const [busy, setBusy] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+  const [searchEmail, setSearchEmail] = useState("");
+  const [foundUser, setFoundUser] = useState<{ id: string; username: string; email: string; tokens: number } | null>(null);
+  const [transferAmount, setTransferAmount] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [transferring, setTransferring] = useState(false);
 
   async function load() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -37,8 +43,37 @@ function SettingsPage() {
     }
     const { data: stats } = await supabase.from("site_stats").select("value").eq("key", "visitors").maybeSingle();
     setVisitors(stats?.value ?? 0);
+    const { data: ownerCheck } = await supabase.rpc("is_owner", { _user_id: user.id });
+    setIsOwner(!!ownerCheck);
   }
   useEffect(() => { load(); }, []);
+
+  async function searchUser() {
+    if (!searchEmail.trim()) return toast.error("Enter an email");
+    setSearching(true);
+    setFoundUser(null);
+    const { data, error } = await supabase.rpc("owner_find_user_by_email", { _email: searchEmail.trim() });
+    setSearching(false);
+    if (error) return toast.error(error.message);
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) return toast.error("No user found");
+    setFoundUser(row as { id: string; username: string; email: string; tokens: number });
+  }
+
+  async function transferTokens() {
+    if (!foundUser) return;
+    const amt = parseInt(transferAmount, 10);
+    if (!amt || amt <= 0) return toast.error("Enter a valid amount");
+    setTransferring(true);
+    const { error } = await supabase.rpc("owner_transfer_tokens", { _recipient_email: foundUser.email, _amount: amt });
+    setTransferring(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Sent ${amt} AT to @${foundUser.username}`);
+    setTransferAmount("");
+    setFoundUser({ ...foundUser, tokens: foundUser.tokens + amt });
+    load();
+  }
+
 
   async function saveProfile() {
     if (!profile) return;
