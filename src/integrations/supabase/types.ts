@@ -464,6 +464,19 @@ export type Database = {
       }
       increment_visitor: { Args: never; Returns: number }
       is_owner: { Args: { _user_id: string }; Returns: boolean }
+      owner_find_user_by_email: {
+        Args: { _email: string }
+        Returns: {
+          email: string
+          id: string
+          tokens: number
+          username: string
+        }[]
+      }
+      owner_transfer_tokens: {
+        Args: { _amount: number; _recipient_email: string }
+        Returns: number
+      }
       relaxa_join: { Args: never; Returns: string }
       relaxa_leave: { Args: { _room: string }; Returns: undefined }
     }
