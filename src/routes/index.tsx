@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import portrait from "@/assets/abdullah-portrait.jpg";
+import portrait from "@/assets/tasswur-monogram.png";
 import { Youtube } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 

@@ -1,4 +1,4 @@
-import portrait from "@/assets/abdullah-portrait.jpg";
+import portrait from "@/assets/tasswur-monogram.png";
 
 export function Logo({ size = 40, className = "", glow = true }: { size?: number; className?: string; glow?: boolean }) {
   return (
