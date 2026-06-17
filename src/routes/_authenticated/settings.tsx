@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LogOut, Trash2, Users, AtSign, KeyRound, Save, Search, Send, Crown } from "lucide-react";
+import { LogOut, Trash2, Users, AtSign, KeyRound, Save, Search, Send, Crown, ShieldPlus, ShieldMinus } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -30,6 +30,9 @@ function SettingsPage() {
   const [transferAmount, setTransferAmount] = useState("");
   const [searching, setSearching] = useState(false);
   const [transferring, setTransferring] = useState(false);
+  const [grantEmail, setGrantEmail] = useState("");
+  const [granting, setGranting] = useState(false);
+  const [owners, setOwners] = useState<Array<{ id: string; username: string; email: string }>>([]);
 
   async function load() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -45,6 +48,10 @@ function SettingsPage() {
     setVisitors(stats?.value ?? 0);
     const { data: ownerCheck } = await supabase.rpc("is_owner", { _user_id: user.id });
     setIsOwner(!!ownerCheck);
+    if (ownerCheck) {
+      const { data: list } = await supabase.rpc("owner_list_owners");
+      setOwners((list as Array<{ id: string; username: string; email: string }>) ?? []);
+    }
   }
   useEffect(() => { load(); }, []);
 
@@ -73,6 +80,26 @@ function SettingsPage() {
     setFoundUser({ ...foundUser, tokens: foundUser.tokens + amt });
     load();
   }
+
+  async function grantOwner() {
+    if (!grantEmail.trim()) return toast.error("Enter an email");
+    setGranting(true);
+    const { error } = await supabase.rpc("owner_grant_owner_by_email", { _email: grantEmail.trim() });
+    setGranting(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Owner access granted to ${grantEmail.trim()}`);
+    setGrantEmail("");
+    load();
+  }
+
+  async function revokeOwner(email: string) {
+    if (!confirm(`Revoke owner access from ${email}?`)) return;
+    const { error } = await supabase.rpc("owner_revoke_owner_by_email", { _email: email });
+    if (error) return toast.error(error.message);
+    toast.success("Owner access revoked");
+    load();
+  }
+
 
 
   async function saveProfile() {
