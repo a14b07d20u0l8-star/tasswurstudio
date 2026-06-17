@@ -244,6 +244,46 @@ function SettingsPage() {
           </div>
         )}
 
+        {isOwner && (
+          <div className="glass rounded-3xl p-5 space-y-3 border border-gold/30">
+            <p className="text-xs uppercase tracking-widest text-gold flex items-center gap-1"><ShieldPlus size={12} /> Owner: Grant Owner Access</p>
+            <p className="text-[11px] text-foreground/60">Granted accounts share all owner powers (support, token transfers, seven-star reviews). The primary owner cannot be revoked.</p>
+            <div className="flex gap-2">
+              <input
+                type="email" placeholder="User email to grant" value={grantEmail}
+                onChange={(e) => setGrantEmail(e.target.value)}
+                className="flex-1 rounded-xl border border-white/10 bg-black/40 px-4 py-2.5 text-sm outline-none focus:border-gold/60"
+              />
+              <button disabled={granting} onClick={grantOwner} className="btn-neon btn-neon-hover inline-flex items-center gap-1 disabled:opacity-50">
+                <ShieldPlus size={14} /> {granting ? "…" : "Grant"}
+              </button>
+            </div>
+            {owners.length > 0 && (
+              <div className="space-y-1.5">
+                <p className="text-[10px] uppercase tracking-widest text-foreground/50">Current Owners</p>
+                {owners.map((o) => {
+                  const isPrimary = o.email?.toLowerCase() === "a14b07d20u0l8@gmail.com";
+                  return (
+                    <div key={o.id} className="flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-black/30 px-3 py-2">
+                      <div className="min-w-0">
+                        <p className="text-sm text-foreground truncate">@{o.username} {isPrimary && <span className="ml-1 text-[9px] text-gold">PRIMARY</span>}</p>
+                        <p className="text-[10px] text-foreground/50 truncate">{o.email}</p>
+                      </div>
+                      {!isPrimary && (
+                        <button onClick={() => revokeOwner(o.email)} className="rounded-full border border-destructive/40 px-2 py-1 text-[10px] text-destructive hover:bg-destructive/10 inline-flex items-center gap-1">
+                          <ShieldMinus size={10} /> Revoke
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+
+
 
 
         <div className="grid grid-cols-2 gap-2">
