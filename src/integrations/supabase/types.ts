@@ -40,6 +40,7 @@ export type Database = {
           note: string | null
           screenshot_url: string
           status: string
+          transaction_id: string | null
           user_id: string
         }
         Insert: {
@@ -49,6 +50,7 @@ export type Database = {
           note?: string | null
           screenshot_url: string
           status?: string
+          transaction_id?: string | null
           user_id: string
         }
         Update: {
@@ -58,6 +60,7 @@ export type Database = {
           note?: string | null
           screenshot_url?: string
           status?: string
+          transaction_id?: string | null
           user_id?: string
         }
         Relationships: []
@@ -473,6 +476,16 @@ export type Database = {
           username: string
         }[]
       }
+      owner_grant_owner_by_email: { Args: { _email: string }; Returns: string }
+      owner_list_owners: {
+        Args: never
+        Returns: {
+          email: string
+          id: string
+          username: string
+        }[]
+      }
+      owner_revoke_owner_by_email: { Args: { _email: string }; Returns: string }
       owner_transfer_tokens: {
         Args: { _amount: number; _recipient_email: string }
         Returns: number
