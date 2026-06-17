@@ -4,7 +4,7 @@ import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { MODULES, type ModuleKey } from "@/lib/modules";
 import { toast } from "sonner";
-import { Trash2, RefreshCcw, X, CheckCircle2, AlertTriangle, Clock } from "lucide-react";
+import { Trash2, RefreshCcw, X, CheckCircle2, AlertTriangle, Clock, Pencil } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/my-profiles")({
   component: MyProfiles,
@@ -17,6 +17,13 @@ interface MyListing {
   category: string;
   business_name: string | null;
   owner_name: string;
+  experience: string | null;
+  whatsapp: string;
+  age: number | null;
+  city: string | null;
+  address: string | null;
+  fee: number | null;
+  subjects: string[] | null;
   active: boolean;
   expires_at: string;
   created_at: string;
@@ -29,6 +36,7 @@ function MyProfiles() {
   const [items, setItems] = useState<MyListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [reactivate, setReactivate] = useState<MyListing | null>(null);
+  const [editing, setEditing] = useState<MyListing | null>(null);
 
   async function load() {
     setLoading(true);
@@ -36,7 +44,7 @@ function MyProfiles() {
     if (!user) return;
     const { data, error } = await supabase
       .from("listings")
-      .select("id,user_id,module,category,business_name,owner_name,active,expires_at,created_at,last_paid_at,total_paid,plan")
+      .select("id,user_id,module,category,business_name,owner_name,experience,whatsapp,age,city,address,fee,subjects,active,expires_at,created_at,last_paid_at,total_paid,plan")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
     if (error) toast.error(error.message);
