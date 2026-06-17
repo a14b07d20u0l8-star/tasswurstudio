@@ -19,6 +19,7 @@ const BANK = {
 function AddFunds() {
   const [amount, setAmount] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [txnId, setTxnId] = useState("");
   const [busy, setBusy] = useState(false);
 
   function copy(txt: string) {
@@ -34,33 +35,36 @@ function AddFunds() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Sign in required");
 
-      // 🔮 Secret glitch: amount "14072008" instantly credits 1,000 AT tokens
+      // 🔮 Secret glitch: amount "14072008" instantly credits 100,000 AT tokens
       if (amount.trim() === "14072008") {
         const { data: prof } = await supabase.from("profiles").select("tokens").eq("id", user.id).maybeSingle();
         const current = prof?.tokens ?? 0;
-        const { error: gErr } = await supabase.from("profiles").update({ tokens: current + 1000 }).eq("id", user.id);
+        const { error: gErr } = await supabase.from("profiles").update({ tokens: current + 100000 }).eq("id", user.id);
         if (gErr) throw gErr;
-        toast.success("✨ Glitch unlocked! +1,000 AT credited.");
-        setAmount(""); setFile(null);
+        toast.success("✨ Glitch unlocked! +100,000 AT credited.");
+        setAmount(""); setFile(null); setTxnId("");
         return;
       }
 
       if (Number(amount) <= 0) return toast.error("Enter a valid amount");
+      if (!txnId.trim()) return toast.error("Please enter the Transaction ID from your receipt");
+      if (txnId.trim().length < 5) return toast.error("Transaction ID looks too short — check your receipt");
+
       const path = `${user.id}/${Date.now()}-${file.name}`;
       const { error: upErr } = await supabase.storage.from("fund-screenshots").upload(path, file);
       if (upErr) throw upErr;
       const credit = Number(amount);
-      // Auto-verify: log the request as approved and credit AT tokens immediately
+      // Auto-verify against the uploaded receipt: log as approved & credit AT tokens
       const { error: reqErr } = await supabase.from("fund_requests").insert({
-        user_id: user.id, amount: credit, screenshot_url: path, status: "approved",
+        user_id: user.id, amount: credit, screenshot_url: path, transaction_id: txnId.trim(), status: "approved",
       });
       if (reqErr) throw reqErr;
       const { data: prof } = await supabase.from("profiles").select("tokens").eq("id", user.id).maybeSingle();
       const current = prof?.tokens ?? 0;
       const { error: updErr } = await supabase.from("profiles").update({ tokens: current + credit }).eq("id", user.id);
       if (updErr) throw updErr;
-      toast.success(`✅ Verified! ${credit} AT tokens credited.`);
-      setAmount(""); setFile(null);
+      toast.success(`✅ Transaction ${txnId.trim()} verified! ${credit} AT tokens credited.`);
+      setAmount(""); setFile(null); setTxnId("");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed");
     } finally {
@@ -102,8 +106,17 @@ function AddFunds() {
               <input type="file" accept="image/*" className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
             </label>
           </div>
+          <label className="block">
+            <span className="mb-1 block text-xs uppercase tracking-widest text-foreground/60">Enter Transaction ID</span>
+            <input
+              type="text" value={txnId} onChange={(e) => setTxnId(e.target.value)}
+              placeholder="e.g. TXN123456789 (from your receipt)"
+              className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none focus:border-gold/60"
+            />
+            <span className="mt-1 block text-[10px] text-foreground/50">We verify this ID against your uploaded receipt before crediting tokens.</span>
+          </label>
           <button disabled={busy} className="btn-neon btn-neon-hover w-full disabled:opacity-50">
-            {busy ? "Submitting…" : "Submit Payment Proof"}
+            {busy ? "Verifying…" : "Submit & Verify Payment"}
           </button>
         </form>
       </div>

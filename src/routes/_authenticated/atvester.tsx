@@ -97,12 +97,6 @@ function AtVester() {
           <div className="glass rounded-3xl p-6 animate-scale-in">
             <div className="text-center">
               <h1 className="font-display text-2xl text-gradient-gold">Abdullah Tasswur</h1>
-              <p className="text-xs uppercase tracking-widest text-foreground/60">Founder · Tasswur Studio</p>
-            </div>
-            <div className="mt-4 space-y-2 text-sm text-foreground/80">
-              <p>📍 Pakistan</p>
-              <p>🎯 Looking for serious investors to scale the Relaxa platform nation-wide.</p>
-              <p>📊 Monthly revenue: 1–2 lac PKR (and scaling).</p>
             </div>
             <a
               href={waLink(OWNER_WHATSAPP, OWNER_MSG)}

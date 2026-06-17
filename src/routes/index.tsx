@@ -84,18 +84,28 @@ function IntroPage() {
       {/* Story */}
       <section className="mx-auto max-w-3xl px-5 pb-24">
         <div className="glass rounded-3xl p-6 sm:p-10" style={{ animation: "fade-up 1s ease-out 0.4s both" }}>
-          <p className="text-base leading-relaxed text-foreground/85 sm:text-lg">
-            <G>Bachpan sa kuch alag</G> kernay ka shok tha. Kuch <G>different kern</G> ka. Ideas 1000+ but <W>investment 0rs</W>. 2024 ma jab ma matric ka papers day chuka tha, us ka baad mujhay <G>online advertisement</G> ka baray ma pata laga — kasay Facebook aur Instagram per ads chala ker online customers WhatsApp per hasil ker saktay ho. Us waqt apna business ka naam ma na <G>"Tasswar Studió"</G> rakha.
-            <br /><br />
-            Us waqt ma na ads ka liya <W>1500rs apnay chotay bhai sa liya</W>. Tab ma YouTube, Instagram, Facebook etc ka likes aur followers sale kerta tha — subha sa sham tak customers se deal kerta aur raat ko mujhay <G>1500–1800rs</G> mil jata tha. Us ma sa ma next day dobara 1500rs ki ads lagwata tha — matlab <W>daily profit 0rs–300rs</W>, jo maray liya bohot kam tha.
-            <br /><br />
-            Is liya ma na <G>new services</G> add ki jo meri skills thi — Video Editing, Graphic Designing aur Content Creation. Is sa mujhay weekly <G>4k–5k profit</G> hota tha — but <W>ya bhi kam tha</W>.
-            <br /><br />
-            Khair ghar walo ka kehnay per <W>1 saal working band rahi</W>, phir 1st year ka papers ka baad doobara start ki — naye skills aur improved working ka saath. Ihista ihista ma na apnay business ka liya <G>workers rakhay</G>, aur 2026 ma mera saara business workers handle kernay lagay. Vo workers kaam kertay thay, ma owner tha — ma paisay ikhatay kerta tha. Ihista ihista ma monthly <G>1–2 lac</G> kamanay laga.
-            <br /><br />
-            Lakin ya bhi kam tha, to ma na ya saaray paisay <G>invest kiya</G>, apnay ideas use kiya aur ya website banai.
-            <br /><br />
-            <R>Lakin ya bhi kam ha.</R>
+          <p className="text-lg leading-relaxed text-foreground/90 sm:text-xl text-center">
+            <G>Some people wait for opportunities.</G>
+            <br />
+            <W>We build them.</W>
+          </p>
+
+          <p className="mt-6 text-center font-display text-2xl sm:text-3xl text-gradient-neon" style={{ animation: "gradient-pan 6s ease infinite" }}>
+            From Zero Investment to Unlimited Possibilities.
+          </p>
+
+          <p className="mt-8 text-base leading-relaxed text-foreground/85 sm:text-lg text-center">
+            Welcome to <G>Tasswur Studio</G> — a platform designed for <W>dreamers</W>, <W>creators</W>, <W>students</W>, <W>workers</W>, <W>businesses</W>, <W>innovators</W> and many more.
+          </p>
+
+          <div className="mt-8 flex flex-col items-center gap-2 text-base sm:text-lg">
+            <p className="text-foreground/85"><G>Connect</G> with people.</p>
+            <p className="text-foreground/85"><G>Discover</G> opportunities.</p>
+            <p className="text-foreground/85"><G>Build</G> your future.</p>
+          </div>
+
+          <p className="mt-8 text-center font-display text-xl sm:text-2xl text-gradient-gold">
+            Your next opportunity starts here.
           </p>
 
           <div className="mt-10 flex justify-center">
