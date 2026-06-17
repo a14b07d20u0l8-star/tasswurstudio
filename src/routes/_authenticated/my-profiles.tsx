@@ -115,12 +115,15 @@ function MyProfiles() {
                       </p>
                     </div>
                   </div>
-                  <div className="mt-3 flex gap-2">
+                  <div className="mt-3 flex flex-wrap gap-2">
                     {(expired || !it.active) && cfg && (
                       <button onClick={() => setReactivate(it)} className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-gold to-gold-dim px-3 py-2 text-xs font-semibold text-primary-foreground hover:scale-[1.02]">
                         <RefreshCcw size={12} /> Reactivate
                       </button>
                     )}
+                    <button onClick={() => setEditing(it)} className="flex-1 inline-flex items-center justify-center gap-2 rounded-full border border-gold/40 px-3 py-2 text-xs text-gold hover:bg-gold/10">
+                      <Pencil size={12} /> Edit
+                    </button>
                     <button onClick={() => del(it)} className="flex-1 inline-flex items-center justify-center gap-2 rounded-full border border-destructive/40 px-3 py-2 text-xs text-destructive hover:bg-destructive/10">
                       <Trash2 size={12} /> Delete ({pct}%)
                     </button>
@@ -135,7 +138,95 @@ function MyProfiles() {
       {reactivate && (
         <ReactivateModal listing={reactivate} onClose={() => setReactivate(null)} onDone={() => { setReactivate(null); load(); }} />
       )}
+      {editing && (
+        <EditModal listing={editing} onClose={() => setEditing(null)} onDone={() => { setEditing(null); load(); }} />
+      )}
     </AppShell>
+  );
+}
+
+function EditModal({ listing, onClose, onDone }: { listing: MyListing; onClose: () => void; onDone: () => void }) {
+  const cfg = MODULES[listing.module as ModuleKey];
+  const [busy, setBusy] = useState(false);
+  const [form, setForm] = useState({
+    business_name: listing.business_name ?? "",
+    owner_name: listing.owner_name ?? "",
+    experience: listing.experience ?? "",
+    whatsapp: listing.whatsapp ?? "",
+    age: listing.age?.toString() ?? "",
+    city: listing.city ?? "",
+    address: listing.address ?? "",
+    fee: listing.fee?.toString() ?? "",
+    subjects: (listing.subjects ?? []).join(", "),
+    active: listing.active,
+  });
+  function upd<K extends keyof typeof form>(k: K, v: typeof form[K]) { setForm(f => ({ ...f, [k]: v })); }
+
+  async function save() {
+    setBusy(true);
+    try {
+      const subjects = form.subjects ? form.subjects.split(",").map(s => s.trim()).filter(Boolean) : null;
+      const { error } = await supabase.from("listings").update({
+        business_name: cfg?.fields.business ? (form.business_name || null) : listing.business_name,
+        owner_name: form.owner_name,
+        experience: form.experience || null,
+        whatsapp: form.whatsapp,
+        age: cfg?.fields.age && form.age ? Number(form.age) : null,
+        city: cfg?.fields.city ? (form.city || null) : null,
+        address: cfg?.fields.address ? (form.address || null) : null,
+        fee: cfg?.fields.fee && form.fee ? Number(form.fee) : null,
+        subjects,
+        active: form.active,
+      }).eq("id", listing.id);
+      if (error) throw error;
+      toast.success("Profile updated");
+      onDone();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed");
+    } finally { setBusy(false); }
+  }
+
+  const F = ({ label, value, onChange, type = "text", required }: { label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean }) => (
+    <label className="block">
+      <span className="mb-1 block text-xs uppercase tracking-widest text-foreground/60">{label}</span>
+      <input
+        type={type} value={value} required={required}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-2.5 text-sm outline-none focus:border-gold/60"
+      />
+    </label>
+  );
+
+  return (
+    <div onClick={onClose} className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur p-2 sm:items-center animate-fade-in">
+      <div onClick={(e) => e.stopPropagation()} className="glass max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-3xl p-5 scrollbar-thin animate-scale-in">
+        <div className="mb-3 flex items-center justify-between">
+          <div>
+            <h3 className="font-display text-lg text-gradient-gold">Edit Profile</h3>
+            <p className="text-xs text-foreground/60">{cfg?.title} · {listing.category}</p>
+          </div>
+          <button onClick={onClose} className="rounded-full p-2 hover:bg-white/10"><X size={16} /></button>
+        </div>
+        <div className="space-y-3">
+          {cfg?.fields.business && <F label="Business Name" value={form.business_name} onChange={(v) => upd("business_name", v)} />}
+          <F label="Name" required value={form.owner_name} onChange={(v) => upd("owner_name", v)} />
+          {cfg?.fields.age && <F label="Age" type="number" value={form.age} onChange={(v) => upd("age", v)} />}
+          {cfg?.fields.city && <F label="City" value={form.city} onChange={(v) => upd("city", v)} />}
+          {cfg?.fields.address && <F label="Address" value={form.address} onChange={(v) => upd("address", v)} />}
+          <F label="Experience" value={form.experience} onChange={(v) => upd("experience", v)} />
+          {cfg?.fields.fee && <F label="Fee" type="number" value={form.fee} onChange={(v) => upd("fee", v)} />}
+          {cfg?.fields.subjects && <F label="Subjects (comma separated)" value={form.subjects} onChange={(v) => upd("subjects", v)} />}
+          <F label="WhatsApp Number" required value={form.whatsapp} onChange={(v) => upd("whatsapp", v)} />
+          <label className="flex items-center justify-between rounded-xl border border-white/10 bg-black/40 px-4 py-3">
+            <span className="text-sm">Visible / Active</span>
+            <input type="checkbox" checked={form.active} onChange={(e) => upd("active", e.target.checked)} className="h-5 w-5 accent-gold" />
+          </label>
+        </div>
+        <button disabled={busy} onClick={save} className="btn-neon btn-neon-hover mt-5 w-full disabled:opacity-50">
+          {busy ? "Saving…" : "Save Changes"}
+        </button>
+      </div>
+    </div>
   );
 }
 
