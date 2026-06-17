@@ -22,9 +22,6 @@ const G = ({ children }: { children: React.ReactNode }) => (
 const W = ({ children }: { children: React.ReactNode }) => (
   <span className="text-white font-semibold">{children}</span>
 );
-const R = ({ children }: { children: React.ReactNode }) => (
-  <span className="font-bold" style={{ color: "oklch(0.55 0.18 25)" }}>{children}</span>
-);
 
 function IntroPage() {
   const [stage, setStage] = useState(0);
