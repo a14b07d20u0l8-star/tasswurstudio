@@ -5,7 +5,7 @@ import { MODULES, type ModuleKey, type ModuleConfig } from "@/lib/modules";
 import { supabase } from "@/integrations/supabase/client";
 import { waLink } from "@/lib/whatsapp";
 import { toast } from "sonner";
-import { Search, Plus, MessageCircle, Star, X, ImagePlus, Trash2, Pin } from "lucide-react";
+import { Search, Plus, MessageCircle, Star, X, ImagePlus, Trash2, Pin, Globe, Instagram, Facebook } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/m/$module/$category")({
   component: CategoryPage,
@@ -28,6 +28,11 @@ interface Listing {
   active: boolean;
   pinned?: boolean;
   total_paid?: number;
+  whatsapp_channel?: string | null;
+  tiktok?: string | null;
+  instagram?: string | null;
+  facebook?: string | null;
+  website?: string | null;
 }
 
 interface Rating {
@@ -42,6 +47,60 @@ interface Rating {
 interface ListingWithStats extends Listing {
   avg: number;
   count: number;
+}
+
+async function recordContact(listingId: string) {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("profile_contacts").insert({ user_id: user.id, listing_id: listingId });
+  } catch {
+    // duplicate or offline — ignore
+  }
+}
+
+function SocialIconLink({ href, label, children, color }: { href: string; label: string; children: React.ReactNode; color: string }) {
+  return (
+    <a href={href} target="_blank" rel="noreferrer" title={label} aria-label={label}
+      className={`inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-black/40 text-foreground/80 transition hover:scale-110 ${color}`}>
+      {children}
+    </a>
+  );
+}
+
+function SocialLinks({ item }: { item: Listing }) {
+  const has = item.whatsapp_channel || item.tiktok || item.instagram || item.facebook || item.website;
+  if (!has) return null;
+  const norm = (u: string) => (/^https?:\/\//i.test(u) ? u : `https://${u}`);
+  return (
+    <div className="mt-2 flex flex-wrap gap-2">
+      {item.whatsapp_channel && (
+        <SocialIconLink href={norm(item.whatsapp_channel)} label="WhatsApp Channel" color="hover:text-emerald-400 hover:border-emerald-400/60">
+          <MessageCircle size={14} />
+        </SocialIconLink>
+      )}
+      {item.tiktok && (
+        <SocialIconLink href={norm(item.tiktok)} label="TikTok" color="hover:text-pink-400 hover:border-pink-400/60">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden><path d="M19.6 6.3a5 5 0 0 1-3.2-1.2 5 5 0 0 1-1.7-3H11v12.3a2.7 2.7 0 1 1-2-2.6V8.4a5.7 5.7 0 1 0 5 5.6V9.8a8 8 0 0 0 5 1.7v-3a5 5 0 0 1-1.4-2.2z"/></svg>
+        </SocialIconLink>
+      )}
+      {item.instagram && (
+        <SocialIconLink href={norm(item.instagram)} label="Instagram" color="hover:text-pink-400 hover:border-pink-400/60">
+          <Instagram size={14} />
+        </SocialIconLink>
+      )}
+      {item.facebook && (
+        <SocialIconLink href={norm(item.facebook)} label="Facebook" color="hover:text-blue-400 hover:border-blue-400/60">
+          <Facebook size={14} />
+        </SocialIconLink>
+      )}
+      {item.website && (
+        <SocialIconLink href={norm(item.website)} label="Website" color="hover:text-gold hover:border-gold/60">
+          <Globe size={14} />
+        </SocialIconLink>
+      )}
+    </div>
+  );
 }
 
 function CategoryPage() {
@@ -223,6 +282,7 @@ function ListingCard({
         <a
           href={waLink(item.whatsapp, `Hi! I found your profile on Tasswur Studio under ${cfg.title}.`)}
           target="_blank" rel="noreferrer"
+          onClick={() => { void recordContact(item.id); }}
           className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500/90 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:scale-[1.02]"
         >
           <MessageCircle size={14} /> WhatsApp
@@ -231,6 +291,8 @@ function ListingCard({
           <Star size={12} className="inline" /> Reviews
         </button>
       </div>
+      <SocialLinks item={item} />
+
       {(isOwner || isMine) && (
         <div className="mt-2 flex gap-2">
           {isOwner && (
@@ -274,6 +336,7 @@ function ReviewsModal({ listing, me, isOwner, onClose }: { listing: Listing; me:
   const [stars, setStars] = useState(5);
   const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
+  const [hasContacted, setHasContacted] = useState<boolean | null>(null);
   const max = isOwner ? 7 : 5;
 
   async function load() {
@@ -282,12 +345,29 @@ function ReviewsModal({ listing, me, isOwner, onClose }: { listing: Listing; me:
   }
   useEffect(() => { load(); }, [listing.id]);
 
+  useEffect(() => {
+    (async () => {
+      if (!me) { setHasContacted(false); return; }
+      const { data, error } = await supabase
+        .from("profile_contacts").select("id")
+        .eq("user_id", me).eq("listing_id", listing.id).maybeSingle();
+      setHasContacted(!error && !!data);
+    })();
+  }, [me, listing.id]);
+
   const mine = reviews.find(r => r.user_id === me);
+  useEffect(() => {
+    if (mine) {
+      setStars(mine.stars);
+      setComment(mine.comment ?? "");
+    }
+  }, [mine?.id]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!me) return toast.error("Sign in required");
     if (me === listing.user_id) return toast.error("You can't review your own profile");
+    if (!hasContacted) return toast.error("You must contact this profile before leaving a review.");
     setBusy(true);
     const payload = { listing_id: listing.id, user_id: me, stars, comment: comment || null };
     const { error } = mine
@@ -296,8 +376,11 @@ function ReviewsModal({ listing, me, isOwner, onClose }: { listing: Listing; me:
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success(mine ? "Review updated" : "Review submitted");
-    setComment(""); load();
+    load();
   }
+
+  const canReview = !!me && me !== listing.user_id && hasContacted === true;
+  const showContactGate = !!me && me !== listing.user_id && hasContacted === false;
 
   return (
     <div onClick={onClose} className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur p-2 sm:items-center animate-fade-in">
@@ -310,7 +393,13 @@ function ReviewsModal({ listing, me, isOwner, onClose }: { listing: Listing; me:
           <button onClick={onClose} className="rounded-full p-2 hover:bg-white/10"><X size={16} /></button>
         </div>
 
-        {me && me !== listing.user_id && (
+        {showContactGate && (
+          <div className="mb-4 rounded-2xl border border-gold/30 bg-gold/5 p-3 text-xs text-foreground/80">
+            You must contact this profile before leaving a review.
+          </div>
+        )}
+
+        {canReview && (
           <form onSubmit={submit} className="mb-4 rounded-2xl border border-white/10 bg-black/30 p-3">
             <p className="mb-2 text-xs uppercase tracking-widest text-foreground/60">
               {mine ? "Update your review" : "Leave a review"} {isOwner && "(owner: up to 7★)"}
@@ -362,6 +451,11 @@ interface FormState {
   subjects: string;
   plan: string;
   active: boolean;
+  whatsapp_channel: string;
+  tiktok: string;
+  instagram: string;
+  facebook: string;
+  website: string;
 }
 
 function CreateForm({
@@ -373,6 +467,7 @@ function CreateForm({
   const [form, setForm] = useState<FormState>({
     business_name: "", owner_name: "", experience: "", whatsapp: "",
     age: "", city: "", address: "", fee: "", subjects: "", plan: cfg.plans[0].id, active: true,
+    whatsapp_channel: "", tiktok: "", instagram: "", facebook: "", website: "",
   });
   function upd<K extends keyof FormState>(k: K, v: FormState[K]) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -431,6 +526,11 @@ function CreateForm({
         expires_at: expires,
         total_paid: plan.price,
         last_paid_at: new Date().toISOString(),
+        whatsapp_channel: form.whatsapp_channel.trim() || null,
+        tiktok: form.tiktok.trim() || null,
+        instagram: form.instagram.trim() || null,
+        facebook: form.facebook.trim() || null,
+        website: form.website.trim() || null,
       });
       if (error) throw error;
       toast.success(`Profile created! ${plan.price} AT deducted.`);
@@ -469,7 +569,17 @@ function CreateForm({
           {cfg.fields.subjects && <Field label="Subjects (comma separated)" value={form.subjects} onChange={(v) => upd("subjects", v)} />}
           <Field label="WhatsApp Number" placeholder="+923XXXXXXXXX" required value={form.whatsapp} onChange={(v) => upd("whatsapp", v)} />
 
+          <div className="rounded-xl border border-white/10 bg-black/20 p-3 space-y-2">
+            <p className="text-[10px] uppercase tracking-widest text-foreground/50">Social & Website Links (all optional)</p>
+            <Field label="WhatsApp Channel Link" placeholder="https://whatsapp.com/channel/..." value={form.whatsapp_channel} onChange={(v) => upd("whatsapp_channel", v)} />
+            <Field label="TikTok Profile Link" placeholder="https://tiktok.com/@you" value={form.tiktok} onChange={(v) => upd("tiktok", v)} />
+            <Field label="Instagram Profile Link" placeholder="https://instagram.com/you" value={form.instagram} onChange={(v) => upd("instagram", v)} />
+            <Field label="Facebook Profile Link" placeholder="https://facebook.com/you" value={form.facebook} onChange={(v) => upd("facebook", v)} />
+            <Field label="Website Link" placeholder="https://yourwebsite.com" value={form.website} onChange={(v) => upd("website", v)} />
+          </div>
+
           <ImageInput files={files} setFiles={setFiles} min={cfg.fields.minImages ?? 0} />
+
 
           <label className="flex items-center justify-between rounded-xl border border-white/10 bg-black/40 px-4 py-3">
             <span className="text-sm">Active Profile</span>

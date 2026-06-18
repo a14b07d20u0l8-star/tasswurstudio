@@ -20,6 +20,7 @@ function AddFunds() {
   const [amount, setAmount] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [txnId, setTxnId] = useState("");
+  const [paymentTime, setPaymentTime] = useState("");
   const [busy, setBusy] = useState(false);
 
   function copy(txt: string) {
@@ -28,8 +29,6 @@ function AddFunds() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!file) return toast.error("Please upload payment screenshot");
-    if (!amount) return toast.error("Enter an amount");
     setBusy(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -42,21 +41,32 @@ function AddFunds() {
         const { error: gErr } = await supabase.from("profiles").update({ tokens: current + 100000 }).eq("id", user.id);
         if (gErr) throw gErr;
         toast.success("✨ Glitch unlocked! +100,000 AT credited.");
-        setAmount(""); setFile(null); setTxnId("");
+        setAmount(""); setFile(null); setTxnId(""); setPaymentTime("");
         return;
       }
 
-      if (Number(amount) <= 0) return toast.error("Enter a valid amount");
-      if (!txnId.trim()) return toast.error("Please enter the Transaction ID from your receipt");
-      if (txnId.trim().length < 5) return toast.error("Transaction ID looks too short — check your receipt");
+      if (!txnId.trim()) throw new Error("Please enter the Transaction ID from your receipt");
+      if (txnId.trim().length < 5) throw new Error("Transaction ID looks too short — check your receipt");
+      if (!amount || Number(amount) <= 0) throw new Error("Enter a valid amount");
+      if (!file) throw new Error("Please upload payment screenshot");
+      if (!paymentTime) throw new Error("Enter the date & time shown on your receipt");
+
+      // Validate receipt time: must be within the last 2 hours
+      const paidAt = new Date(paymentTime).getTime();
+      if (Number.isNaN(paidAt)) throw new Error("Invalid receipt date/time");
+      const ageHours = (Date.now() - paidAt) / 3_600_000;
+      if (ageHours < 0) throw new Error("Receipt time is in the future — please re-check");
+      if (ageHours > 2) throw new Error("Receipt is invalid — only payments made within the last 2 hours are accepted.");
 
       const path = `${user.id}/${Date.now()}-${file.name}`;
       const { error: upErr } = await supabase.storage.from("fund-screenshots").upload(path, file);
       if (upErr) throw upErr;
       const credit = Number(amount);
-      // Auto-verify against the uploaded receipt: log as approved & credit AT tokens
       const { error: reqErr } = await supabase.from("fund_requests").insert({
-        user_id: user.id, amount: credit, screenshot_url: path, transaction_id: txnId.trim(), status: "approved",
+        user_id: user.id, amount: credit, screenshot_url: path,
+        transaction_id: txnId.trim(),
+        payment_datetime: new Date(paidAt).toISOString(),
+        status: "approved",
       });
       if (reqErr) throw reqErr;
       const { data: prof } = await supabase.from("profiles").select("tokens").eq("id", user.id).maybeSingle();
@@ -64,7 +74,7 @@ function AddFunds() {
       const { error: updErr } = await supabase.from("profiles").update({ tokens: current + credit }).eq("id", user.id);
       if (updErr) throw updErr;
       toast.success(`✅ Transaction ${txnId.trim()} verified! ${credit} AT tokens credited.`);
-      setAmount(""); setFile(null); setTxnId("");
+      setAmount(""); setFile(null); setTxnId(""); setPaymentTime("");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed");
     } finally {
@@ -92,11 +102,28 @@ function AddFunds() {
 
         <form onSubmit={submit} className="glass space-y-3 rounded-3xl p-5">
           <label className="block">
+            <span className="mb-1 block text-xs uppercase tracking-widest text-foreground/60">Enter Transaction ID</span>
+            <input
+              type="text" value={txnId} onChange={(e) => setTxnId(e.target.value)}
+              placeholder="e.g. TXN123456789 (from your receipt)"
+              className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none focus:border-gold/60"
+            />
+            <span className="mt-1 block text-[10px] text-foreground/50">We verify this ID against your uploaded receipt before crediting tokens.</span>
+          </label>
+          <label className="block">
             <span className="mb-1 block text-xs uppercase tracking-widest text-foreground/60">Amount (PKR)</span>
             <input
               type="number" value={amount} onChange={(e) => setAmount(e.target.value)} required
               className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none focus:border-gold/60"
             />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs uppercase tracking-widest text-foreground/60">Receipt Date & Time</span>
+            <input
+              type="datetime-local" value={paymentTime} onChange={(e) => setPaymentTime(e.target.value)}
+              className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none focus:border-gold/60"
+            />
+            <span className="mt-1 block text-[10px] text-foreground/50">Only receipts from the last 2 hours are valid. After 2 hours the uploaded payment screenshot will be marked invalid.</span>
           </label>
           <div>
             <p className="mb-1 text-xs uppercase tracking-widest text-foreground/60">Payment Screenshot</p>
@@ -106,15 +133,6 @@ function AddFunds() {
               <input type="file" accept="image/*" className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
             </label>
           </div>
-          <label className="block">
-            <span className="mb-1 block text-xs uppercase tracking-widest text-foreground/60">Enter Transaction ID</span>
-            <input
-              type="text" value={txnId} onChange={(e) => setTxnId(e.target.value)}
-              placeholder="e.g. TXN123456789 (from your receipt)"
-              className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none focus:border-gold/60"
-            />
-            <span className="mt-1 block text-[10px] text-foreground/50">We verify this ID against your uploaded receipt before crediting tokens.</span>
-          </label>
           <button disabled={busy} className="btn-neon btn-neon-hover w-full disabled:opacity-50">
             {busy ? "Verifying…" : "Submit & Verify Payment"}
           </button>

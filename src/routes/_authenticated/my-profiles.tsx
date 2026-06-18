@@ -30,6 +30,11 @@ interface MyListing {
   last_paid_at: string | null;
   total_paid: number;
   plan: string | null;
+  whatsapp_channel: string | null;
+  tiktok: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  website: string | null;
 }
 
 function MyProfiles() {
@@ -44,7 +49,7 @@ function MyProfiles() {
     if (!user) return;
     const { data, error } = await supabase
       .from("listings")
-      .select("id,user_id,module,category,business_name,owner_name,experience,whatsapp,age,city,address,fee,subjects,active,expires_at,created_at,last_paid_at,total_paid,plan")
+      .select("id,user_id,module,category,business_name,owner_name,experience,whatsapp,age,city,address,fee,subjects,active,expires_at,created_at,last_paid_at,total_paid,plan,whatsapp_channel,tiktok,instagram,facebook,website")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
     if (error) toast.error(error.message);
@@ -55,7 +60,9 @@ function MyProfiles() {
 
   function refundPct(it: MyListing): number {
     const base = it.last_paid_at ?? it.created_at;
-    const days = (Date.now() - new Date(base).getTime()) / (1000 * 60 * 60 * 24);
+    const hours = (Date.now() - new Date(base).getTime()) / (1000 * 60 * 60);
+    const days = hours / 24;
+    if (hours <= 12) return 100;
     if (days <= 3) return 80;
     if (days <= 15) return 50;
     if (days <= 25) return 20;
@@ -159,6 +166,11 @@ function EditModal({ listing, onClose, onDone }: { listing: MyListing; onClose: 
     fee: listing.fee?.toString() ?? "",
     subjects: (listing.subjects ?? []).join(", "),
     active: listing.active,
+    whatsapp_channel: listing.whatsapp_channel ?? "",
+    tiktok: listing.tiktok ?? "",
+    instagram: listing.instagram ?? "",
+    facebook: listing.facebook ?? "",
+    website: listing.website ?? "",
   });
   function upd<K extends keyof typeof form>(k: K, v: typeof form[K]) { setForm(f => ({ ...f, [k]: v })); }
 
@@ -177,6 +189,11 @@ function EditModal({ listing, onClose, onDone }: { listing: MyListing; onClose: 
         fee: cfg?.fields.fee && form.fee ? Number(form.fee) : null,
         subjects,
         active: form.active,
+        whatsapp_channel: form.whatsapp_channel.trim() || null,
+        tiktok: form.tiktok.trim() || null,
+        instagram: form.instagram.trim() || null,
+        facebook: form.facebook.trim() || null,
+        website: form.website.trim() || null,
       }).eq("id", listing.id);
       if (error) throw error;
       toast.success("Profile updated");
@@ -217,6 +234,14 @@ function EditModal({ listing, onClose, onDone }: { listing: MyListing; onClose: 
           {cfg?.fields.fee && <F label="Fee" type="number" value={form.fee} onChange={(v) => upd("fee", v)} />}
           {cfg?.fields.subjects && <F label="Subjects (comma separated)" value={form.subjects} onChange={(v) => upd("subjects", v)} />}
           <F label="WhatsApp Number" required value={form.whatsapp} onChange={(v) => upd("whatsapp", v)} />
+          <div className="rounded-xl border border-white/10 bg-black/20 p-3 space-y-2">
+            <p className="text-[10px] uppercase tracking-widest text-foreground/50">Social & Website Links (all optional)</p>
+            <F label="WhatsApp Channel Link" value={form.whatsapp_channel} onChange={(v) => upd("whatsapp_channel", v)} />
+            <F label="TikTok Profile Link" value={form.tiktok} onChange={(v) => upd("tiktok", v)} />
+            <F label="Instagram Profile Link" value={form.instagram} onChange={(v) => upd("instagram", v)} />
+            <F label="Facebook Profile Link" value={form.facebook} onChange={(v) => upd("facebook", v)} />
+            <F label="Website Link" value={form.website} onChange={(v) => upd("website", v)} />
+          </div>
           <label className="flex items-center justify-between rounded-xl border border-white/10 bg-black/40 px-4 py-3">
             <span className="text-sm">Visible / Active</span>
             <input type="checkbox" checked={form.active} onChange={(e) => upd("active", e.target.checked)} className="h-5 w-5 accent-gold" />
