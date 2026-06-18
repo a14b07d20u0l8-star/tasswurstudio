@@ -526,6 +526,11 @@ function CreateForm({
         expires_at: expires,
         total_paid: plan.price,
         last_paid_at: new Date().toISOString(),
+        whatsapp_channel: form.whatsapp_channel.trim() || null,
+        tiktok: form.tiktok.trim() || null,
+        instagram: form.instagram.trim() || null,
+        facebook: form.facebook.trim() || null,
+        website: form.website.trim() || null,
       });
       if (error) throw error;
       toast.success(`Profile created! ${plan.price} AT deducted.`);
