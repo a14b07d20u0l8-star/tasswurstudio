@@ -30,6 +30,11 @@ interface MyListing {
   last_paid_at: string | null;
   total_paid: number;
   plan: string | null;
+  whatsapp_channel: string | null;
+  tiktok: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  website: string | null;
 }
 
 function MyProfiles() {
