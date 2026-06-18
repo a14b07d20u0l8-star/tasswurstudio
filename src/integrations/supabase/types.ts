@@ -38,6 +38,7 @@ export type Database = {
           created_at: string
           id: string
           note: string | null
+          payment_datetime: string | null
           screenshot_url: string
           status: string
           transaction_id: string | null
@@ -48,6 +49,7 @@ export type Database = {
           created_at?: string
           id?: string
           note?: string | null
+          payment_datetime?: string | null
           screenshot_url: string
           status?: string
           transaction_id?: string | null
@@ -58,6 +60,7 @@ export type Database = {
           created_at?: string
           id?: string
           note?: string | null
+          payment_datetime?: string | null
           screenshot_url?: string
           status?: string
           transaction_id?: string | null
@@ -76,9 +79,11 @@ export type Database = {
           created_at: string
           experience: string | null
           expires_at: string
+          facebook: string | null
           fee: number | null
           id: string
           images: string[] | null
+          instagram: string | null
           last_paid_at: string | null
           module: string
           owner_name: string
@@ -86,10 +91,13 @@ export type Database = {
           plan: string
           starts_at: string
           subjects: string[] | null
+          tiktok: string | null
           total_paid: number
           updated_at: string
           user_id: string
+          website: string | null
           whatsapp: string
+          whatsapp_channel: string | null
         }
         Insert: {
           active?: boolean
@@ -101,9 +109,11 @@ export type Database = {
           created_at?: string
           experience?: string | null
           expires_at: string
+          facebook?: string | null
           fee?: number | null
           id?: string
           images?: string[] | null
+          instagram?: string | null
           last_paid_at?: string | null
           module: string
           owner_name: string
@@ -111,10 +121,13 @@ export type Database = {
           plan?: string
           starts_at?: string
           subjects?: string[] | null
+          tiktok?: string | null
           total_paid?: number
           updated_at?: string
           user_id: string
+          website?: string | null
           whatsapp: string
+          whatsapp_channel?: string | null
         }
         Update: {
           active?: boolean
@@ -126,9 +139,11 @@ export type Database = {
           created_at?: string
           experience?: string | null
           expires_at?: string
+          facebook?: string | null
           fee?: number | null
           id?: string
           images?: string[] | null
+          instagram?: string | null
           last_paid_at?: string | null
           module?: string
           owner_name?: string
@@ -136,10 +151,13 @@ export type Database = {
           plan?: string
           starts_at?: string
           subjects?: string[] | null
+          tiktok?: string | null
           total_paid?: number
           updated_at?: string
           user_id?: string
+          website?: string | null
           whatsapp?: string
+          whatsapp_channel?: string | null
         }
         Relationships: []
       }
@@ -157,6 +175,35 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      profile_contacts: {
+        Row: {
+          created_at: string
+          id: string
+          listing_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          listing_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          listing_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_contacts_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
