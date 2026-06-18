@@ -234,6 +234,14 @@ function EditModal({ listing, onClose, onDone }: { listing: MyListing; onClose: 
           {cfg?.fields.fee && <F label="Fee" type="number" value={form.fee} onChange={(v) => upd("fee", v)} />}
           {cfg?.fields.subjects && <F label="Subjects (comma separated)" value={form.subjects} onChange={(v) => upd("subjects", v)} />}
           <F label="WhatsApp Number" required value={form.whatsapp} onChange={(v) => upd("whatsapp", v)} />
+          <div className="rounded-xl border border-white/10 bg-black/20 p-3 space-y-2">
+            <p className="text-[10px] uppercase tracking-widest text-foreground/50">Social & Website Links (all optional)</p>
+            <F label="WhatsApp Channel Link" value={form.whatsapp_channel} onChange={(v) => upd("whatsapp_channel", v)} />
+            <F label="TikTok Profile Link" value={form.tiktok} onChange={(v) => upd("tiktok", v)} />
+            <F label="Instagram Profile Link" value={form.instagram} onChange={(v) => upd("instagram", v)} />
+            <F label="Facebook Profile Link" value={form.facebook} onChange={(v) => upd("facebook", v)} />
+            <F label="Website Link" value={form.website} onChange={(v) => upd("website", v)} />
+          </div>
           <label className="flex items-center justify-between rounded-xl border border-white/10 bg-black/40 px-4 py-3">
             <span className="text-sm">Visible / Active</span>
             <input type="checkbox" checked={form.active} onChange={(e) => upd("active", e.target.checked)} className="h-5 w-5 accent-gold" />
