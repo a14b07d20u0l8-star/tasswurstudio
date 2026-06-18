@@ -569,7 +569,17 @@ function CreateForm({
           {cfg.fields.subjects && <Field label="Subjects (comma separated)" value={form.subjects} onChange={(v) => upd("subjects", v)} />}
           <Field label="WhatsApp Number" placeholder="+923XXXXXXXXX" required value={form.whatsapp} onChange={(v) => upd("whatsapp", v)} />
 
+          <div className="rounded-xl border border-white/10 bg-black/20 p-3 space-y-2">
+            <p className="text-[10px] uppercase tracking-widest text-foreground/50">Social & Website Links (all optional)</p>
+            <Field label="WhatsApp Channel Link" placeholder="https://whatsapp.com/channel/..." value={form.whatsapp_channel} onChange={(v) => upd("whatsapp_channel", v)} />
+            <Field label="TikTok Profile Link" placeholder="https://tiktok.com/@you" value={form.tiktok} onChange={(v) => upd("tiktok", v)} />
+            <Field label="Instagram Profile Link" placeholder="https://instagram.com/you" value={form.instagram} onChange={(v) => upd("instagram", v)} />
+            <Field label="Facebook Profile Link" placeholder="https://facebook.com/you" value={form.facebook} onChange={(v) => upd("facebook", v)} />
+            <Field label="Website Link" placeholder="https://yourwebsite.com" value={form.website} onChange={(v) => upd("website", v)} />
+          </div>
+
           <ImageInput files={files} setFiles={setFiles} min={cfg.fields.minImages ?? 0} />
+
 
           <label className="flex items-center justify-between rounded-xl border border-white/10 bg-black/40 px-4 py-3">
             <span className="text-sm">Active Profile</span>
