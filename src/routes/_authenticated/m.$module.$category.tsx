@@ -28,6 +28,11 @@ interface Listing {
   active: boolean;
   pinned?: boolean;
   total_paid?: number;
+  whatsapp_channel?: string | null;
+  tiktok?: string | null;
+  instagram?: string | null;
+  facebook?: string | null;
+  website?: string | null;
 }
 
 interface Rating {
