@@ -451,6 +451,11 @@ interface FormState {
   subjects: string;
   plan: string;
   active: boolean;
+  whatsapp_channel: string;
+  tiktok: string;
+  instagram: string;
+  facebook: string;
+  website: string;
 }
 
 function CreateForm({
@@ -462,6 +467,7 @@ function CreateForm({
   const [form, setForm] = useState<FormState>({
     business_name: "", owner_name: "", experience: "", whatsapp: "",
     age: "", city: "", address: "", fee: "", subjects: "", plan: cfg.plans[0].id, active: true,
+    whatsapp_channel: "", tiktok: "", instagram: "", facebook: "", website: "",
   });
   function upd<K extends keyof FormState>(k: K, v: FormState[K]) {
     setForm((f) => ({ ...f, [k]: v }));
