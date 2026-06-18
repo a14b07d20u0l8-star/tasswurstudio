@@ -102,11 +102,28 @@ function AddFunds() {
 
         <form onSubmit={submit} className="glass space-y-3 rounded-3xl p-5">
           <label className="block">
+            <span className="mb-1 block text-xs uppercase tracking-widest text-foreground/60">Enter Transaction ID</span>
+            <input
+              type="text" value={txnId} onChange={(e) => setTxnId(e.target.value)}
+              placeholder="e.g. TXN123456789 (from your receipt)"
+              className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none focus:border-gold/60"
+            />
+            <span className="mt-1 block text-[10px] text-foreground/50">We verify this ID against your uploaded receipt before crediting tokens.</span>
+          </label>
+          <label className="block">
             <span className="mb-1 block text-xs uppercase tracking-widest text-foreground/60">Amount (PKR)</span>
             <input
               type="number" value={amount} onChange={(e) => setAmount(e.target.value)} required
               className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none focus:border-gold/60"
             />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs uppercase tracking-widest text-foreground/60">Receipt Date & Time</span>
+            <input
+              type="datetime-local" value={paymentTime} onChange={(e) => setPaymentTime(e.target.value)}
+              className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none focus:border-gold/60"
+            />
+            <span className="mt-1 block text-[10px] text-foreground/50">Only receipts from the last 2 hours are valid. After 2 hours the uploaded payment screenshot will be marked invalid.</span>
           </label>
           <div>
             <p className="mb-1 text-xs uppercase tracking-widest text-foreground/60">Payment Screenshot</p>
@@ -116,15 +133,6 @@ function AddFunds() {
               <input type="file" accept="image/*" className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
             </label>
           </div>
-          <label className="block">
-            <span className="mb-1 block text-xs uppercase tracking-widest text-foreground/60">Enter Transaction ID</span>
-            <input
-              type="text" value={txnId} onChange={(e) => setTxnId(e.target.value)}
-              placeholder="e.g. TXN123456789 (from your receipt)"
-              className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none focus:border-gold/60"
-            />
-            <span className="mt-1 block text-[10px] text-foreground/50">We verify this ID against your uploaded receipt before crediting tokens.</span>
-          </label>
           <button disabled={busy} className="btn-neon btn-neon-hover w-full disabled:opacity-50">
             {busy ? "Verifying…" : "Submit & Verify Payment"}
           </button>
