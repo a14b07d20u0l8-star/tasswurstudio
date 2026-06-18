@@ -49,6 +49,60 @@ interface ListingWithStats extends Listing {
   count: number;
 }
 
+async function recordContact(listingId: string) {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("profile_contacts").insert({ user_id: user.id, listing_id: listingId });
+  } catch {
+    // duplicate or offline — ignore
+  }
+}
+
+function SocialIconLink({ href, label, children, color }: { href: string; label: string; children: React.ReactNode; color: string }) {
+  return (
+    <a href={href} target="_blank" rel="noreferrer" title={label} aria-label={label}
+      className={`inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-black/40 text-foreground/80 transition hover:scale-110 ${color}`}>
+      {children}
+    </a>
+  );
+}
+
+function SocialLinks({ item }: { item: Listing }) {
+  const has = item.whatsapp_channel || item.tiktok || item.instagram || item.facebook || item.website;
+  if (!has) return null;
+  const norm = (u: string) => (/^https?:\/\//i.test(u) ? u : `https://${u}`);
+  return (
+    <div className="mt-2 flex flex-wrap gap-2">
+      {item.whatsapp_channel && (
+        <SocialIconLink href={norm(item.whatsapp_channel)} label="WhatsApp Channel" color="hover:text-emerald-400 hover:border-emerald-400/60">
+          <MessageCircle size={14} />
+        </SocialIconLink>
+      )}
+      {item.tiktok && (
+        <SocialIconLink href={norm(item.tiktok)} label="TikTok" color="hover:text-pink-400 hover:border-pink-400/60">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden><path d="M19.6 6.3a5 5 0 0 1-3.2-1.2 5 5 0 0 1-1.7-3H11v12.3a2.7 2.7 0 1 1-2-2.6V8.4a5.7 5.7 0 1 0 5 5.6V9.8a8 8 0 0 0 5 1.7v-3a5 5 0 0 1-1.4-2.2z"/></svg>
+        </SocialIconLink>
+      )}
+      {item.instagram && (
+        <SocialIconLink href={norm(item.instagram)} label="Instagram" color="hover:text-pink-400 hover:border-pink-400/60">
+          <Instagram size={14} />
+        </SocialIconLink>
+      )}
+      {item.facebook && (
+        <SocialIconLink href={norm(item.facebook)} label="Facebook" color="hover:text-blue-400 hover:border-blue-400/60">
+          <Facebook size={14} />
+        </SocialIconLink>
+      )}
+      {item.website && (
+        <SocialIconLink href={norm(item.website)} label="Website" color="hover:text-gold hover:border-gold/60">
+          <Globe size={14} />
+        </SocialIconLink>
+      )}
+    </div>
+  );
+}
+
 function CategoryPage() {
   const { module, category } = Route.useParams();
   const key = module as ModuleKey;
