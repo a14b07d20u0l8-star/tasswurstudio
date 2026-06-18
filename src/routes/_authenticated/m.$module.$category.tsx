@@ -228,6 +228,7 @@ function ListingCard({
         <a
           href={waLink(item.whatsapp, `Hi! I found your profile on Tasswur Studio under ${cfg.title}.`)}
           target="_blank" rel="noreferrer"
+          onClick={() => { void recordContact(item.id); }}
           className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500/90 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:scale-[1.02]"
         >
           <MessageCircle size={14} /> WhatsApp
@@ -236,6 +237,8 @@ function ListingCard({
           <Star size={12} className="inline" /> Reviews
         </button>
       </div>
+      <SocialLinks item={item} />
+
       {(isOwner || isMine) && (
         <div className="mt-2 flex gap-2">
           {isOwner && (
