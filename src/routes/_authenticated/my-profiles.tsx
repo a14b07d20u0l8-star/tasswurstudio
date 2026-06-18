@@ -189,6 +189,11 @@ function EditModal({ listing, onClose, onDone }: { listing: MyListing; onClose: 
         fee: cfg?.fields.fee && form.fee ? Number(form.fee) : null,
         subjects,
         active: form.active,
+        whatsapp_channel: form.whatsapp_channel.trim() || null,
+        tiktok: form.tiktok.trim() || null,
+        instagram: form.instagram.trim() || null,
+        facebook: form.facebook.trim() || null,
+        website: form.website.trim() || null,
       }).eq("id", listing.id);
       if (error) throw error;
       toast.success("Profile updated");
