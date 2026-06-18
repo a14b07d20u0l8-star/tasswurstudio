@@ -166,6 +166,11 @@ function EditModal({ listing, onClose, onDone }: { listing: MyListing; onClose: 
     fee: listing.fee?.toString() ?? "",
     subjects: (listing.subjects ?? []).join(", "),
     active: listing.active,
+    whatsapp_channel: listing.whatsapp_channel ?? "",
+    tiktok: listing.tiktok ?? "",
+    instagram: listing.instagram ?? "",
+    facebook: listing.facebook ?? "",
+    website: listing.website ?? "",
   });
   function upd<K extends keyof typeof form>(k: K, v: typeof form[K]) { setForm(f => ({ ...f, [k]: v })); }
 
