@@ -55,7 +55,9 @@ function MyProfiles() {
 
   function refundPct(it: MyListing): number {
     const base = it.last_paid_at ?? it.created_at;
-    const days = (Date.now() - new Date(base).getTime()) / (1000 * 60 * 60 * 24);
+    const hours = (Date.now() - new Date(base).getTime()) / (1000 * 60 * 60);
+    const days = hours / 24;
+    if (hours <= 12) return 100;
     if (days <= 3) return 80;
     if (days <= 15) return 50;
     if (days <= 25) return 20;
