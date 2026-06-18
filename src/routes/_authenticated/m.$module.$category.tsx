@@ -336,6 +336,7 @@ function ReviewsModal({ listing, me, isOwner, onClose }: { listing: Listing; me:
   const [stars, setStars] = useState(5);
   const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
+  const [hasContacted, setHasContacted] = useState<boolean | null>(null);
   const max = isOwner ? 7 : 5;
 
   async function load() {
@@ -344,12 +345,29 @@ function ReviewsModal({ listing, me, isOwner, onClose }: { listing: Listing; me:
   }
   useEffect(() => { load(); }, [listing.id]);
 
+  useEffect(() => {
+    (async () => {
+      if (!me) { setHasContacted(false); return; }
+      const { data, error } = await supabase
+        .from("profile_contacts").select("id")
+        .eq("user_id", me).eq("listing_id", listing.id).maybeSingle();
+      setHasContacted(!error && !!data);
+    })();
+  }, [me, listing.id]);
+
   const mine = reviews.find(r => r.user_id === me);
+  useEffect(() => {
+    if (mine) {
+      setStars(mine.stars);
+      setComment(mine.comment ?? "");
+    }
+  }, [mine?.id]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!me) return toast.error("Sign in required");
     if (me === listing.user_id) return toast.error("You can't review your own profile");
+    if (!hasContacted) return toast.error("You must contact this profile before leaving a review.");
     setBusy(true);
     const payload = { listing_id: listing.id, user_id: me, stars, comment: comment || null };
     const { error } = mine
@@ -358,8 +376,11 @@ function ReviewsModal({ listing, me, isOwner, onClose }: { listing: Listing; me:
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success(mine ? "Review updated" : "Review submitted");
-    setComment(""); load();
+    load();
   }
+
+  const canReview = !!me && me !== listing.user_id && hasContacted === true;
+  const showContactGate = !!me && me !== listing.user_id && hasContacted === false;
 
   return (
     <div onClick={onClose} className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur p-2 sm:items-center animate-fade-in">
@@ -372,7 +393,13 @@ function ReviewsModal({ listing, me, isOwner, onClose }: { listing: Listing; me:
           <button onClick={onClose} className="rounded-full p-2 hover:bg-white/10"><X size={16} /></button>
         </div>
 
-        {me && me !== listing.user_id && (
+        {showContactGate && (
+          <div className="mb-4 rounded-2xl border border-gold/30 bg-gold/5 p-3 text-xs text-foreground/80">
+            You must contact this profile before leaving a review.
+          </div>
+        )}
+
+        {canReview && (
           <form onSubmit={submit} className="mb-4 rounded-2xl border border-white/10 bg-black/30 p-3">
             <p className="mb-2 text-xs uppercase tracking-widest text-foreground/60">
               {mine ? "Update your review" : "Leave a review"} {isOwner && "(owner: up to 7★)"}
