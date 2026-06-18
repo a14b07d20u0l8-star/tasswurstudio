@@ -5,7 +5,7 @@ import { MODULES, type ModuleKey, type ModuleConfig } from "@/lib/modules";
 import { supabase } from "@/integrations/supabase/client";
 import { waLink } from "@/lib/whatsapp";
 import { toast } from "sonner";
-import { Search, Plus, MessageCircle, Star, X, ImagePlus, Trash2, Pin } from "lucide-react";
+import { Search, Plus, MessageCircle, Star, X, ImagePlus, Trash2, Pin, Globe, Instagram, Facebook } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/m/$module/$category")({
   component: CategoryPage,
