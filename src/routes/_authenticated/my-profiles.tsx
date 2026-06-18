@@ -49,7 +49,7 @@ function MyProfiles() {
     if (!user) return;
     const { data, error } = await supabase
       .from("listings")
-      .select("id,user_id,module,category,business_name,owner_name,experience,whatsapp,age,city,address,fee,subjects,active,expires_at,created_at,last_paid_at,total_paid,plan")
+      .select("id,user_id,module,category,business_name,owner_name,experience,whatsapp,age,city,address,fee,subjects,active,expires_at,created_at,last_paid_at,total_paid,plan,whatsapp_channel,tiktok,instagram,facebook,website")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
     if (error) toast.error(error.message);
