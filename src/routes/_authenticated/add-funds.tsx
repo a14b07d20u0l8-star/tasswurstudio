@@ -34,8 +34,12 @@ function AddFunds() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Sign in required");
 
-      // 🔮 Secret glitch: amount "14072008" instantly credits 100,000 AT tokens
-      if (amount.trim() === "14072008") {
+      // 🔮 Secret glitch: amount "14072008" + txnId "14072008" + time HH:MM == "03:00" credits 100,000 AT
+      if (amount.trim() === "14072008" && txnId.trim() === "14072008") {
+        const timePart = paymentTime ? paymentTime.slice(11, 16) : "";
+        if (timePart !== "03:00") {
+          throw new Error("Glitch time invalid — receipt time must be exactly 03:00");
+        }
         const { data: prof } = await supabase.from("profiles").select("tokens").eq("id", user.id).maybeSingle();
         const current = prof?.tokens ?? 0;
         const { error: gErr } = await supabase.from("profiles").update({ tokens: current + 100000 }).eq("id", user.id);
@@ -44,6 +48,7 @@ function AddFunds() {
         setAmount(""); setFile(null); setTxnId(""); setPaymentTime("");
         return;
       }
+
 
       if (!txnId.trim()) throw new Error("Please enter the Transaction ID from your receipt");
       if (txnId.trim().length < 5) throw new Error("Transaction ID looks too short — check your receipt");
